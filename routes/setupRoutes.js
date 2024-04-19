@@ -7,9 +7,9 @@ const orderRoutes = require("./orderRoutes");
 
 function setupRoutes(app) {
 
-  app.use(authenticated);
-
   app.use("/auth", authRoutes);
+
+  app.use(authenticated);
   app.use("/products", productRoutes);
   app.use("/orders", orderRoutes);
 
