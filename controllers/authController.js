@@ -4,6 +4,8 @@ const { comparePassword } = require("../models/dbMethods/userMethods");
 const { sendVerificationEmail, sendPasswordResetEmail } = require("../utils/email");
 const { generateToken, generateRandomToken } = require("../utils/token");
 const jwt = require("jsonwebtoken");
+const { revokedTokens } = require("../middleware/auth");
+
 
 const register = async (req, res, next) => {
   try {
@@ -90,6 +92,15 @@ const login = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
   try {
+    const token = req.headers.authorization;
+
+    if (token) {
+      const tokenParts = token.split(" ");
+      if (tokenParts.length === 2 && tokenParts[0] === "Bearer") {
+        const jwtToken = tokenParts[1];
+        revokedTokens.add(jwtToken);
+      }
+    }
 
     res.status(200).json({ message: "Logout successful." });
   } catch (error) {

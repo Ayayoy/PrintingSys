@@ -17,7 +17,6 @@ const errorHandler = (err, req, res, next) => {
     message = "Database Error: An error occurred while accessing the database.";
   }
 
-  console.error(err, err.stack);
   res.status(status).json({
     message: message,
     stack: process.env.NODE_ENV === 'development' ? err.stack : '🥞',

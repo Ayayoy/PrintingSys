@@ -21,8 +21,7 @@ async function sendEmail({ to, subject, html }) {
         });
 
     } catch (error) {
-        console.error("Error sending email:", error);
-        return false;
+      next(error);
     }
 }
 
@@ -72,33 +71,20 @@ const generateEmailContentForUpdateOrderStatus = async (order) => {
           <p>Thank you for choosing us.</p>
         `;
     } catch (error) {
-        console.error('Error generating email content for order update:', error);
-        return '';
+      next(error);
     }
 };
 
 const generateEmailContentForOrderAccept = async (order) => {
     try {
-        // Fetch the product details using product_id from the order
-        const product = await ProductModel.findById(order.product.product_id).exec();
-        const productName = product ? product.name : 'Unknown Product'; // Get product name
-
         return `
           <p>Dear User,</p>
-          <p>Your order with ID ${order._id} has been accepted.</p>
-          <p>Details:</p>
-          <ul>
-            <li>Product: ${productName}</li> <!-- Use product name -->
-            <li>Quantity: ${order.product.quantity}</li>
-            <li>Total Cost: ${order.total_cost}</li>
-            <li>Status: ${order.status}</li>
-          </ul>
-          <p>Please make the payment as soon as possible to complete the order.</p>
+          <p>Your order with our printing press has been accepted.</p>
+          <p>Please check the invoice in yout accountو Please pay as soon as possible..</p>
           <p>Thank you for your order!</p>
         `;
     } catch (error) {
-        console.error('Error generating email content for order acceptance:', error);
-        return '';
+      next(error);
     }
 };
 
@@ -119,7 +105,8 @@ const sendEmailForOrderUpdateOrderStatus = async (order) => {
     try {
       await sendEmail({ to, subject, html: htmlContent });
     } catch (error) {
-      console.error('Error sending email for order update:', error);
+      next(error);
+
     }
 };
 
@@ -131,7 +118,8 @@ const sendEmailForOrderAccept = async (order) => {
     try {
       await sendEmail({ to, subject, html: htmlContent });
     } catch (error) {
-      console.error('Error sending email for order acceptance:', error);
+      next(error);
+
     }
 };
   
@@ -143,7 +131,8 @@ const sendEmailForOrderDeny = async (order) => {
     try {
       await sendEmail({ to, subject, html: htmlContent });
     } catch (error) {
-      console.error('Error sending email for order denial:', error);
+      next(error);
+
     }
 };
 
@@ -158,8 +147,7 @@ async function sendAdminMessageEmail({ to, message }) {
     try {
         await sendEmail({ to, subject, html: htmlContent });
     } catch (error) {
-        console.error('Error sending admin message email:', error);
-        return false;
+      next(error);
     }
 }
   
@@ -171,7 +159,7 @@ async function getUserEmailById(userId) {
       }
       return user.email;
     } catch (error) {
-      throw new Error(`Error fetching user email: ${error.message}`);
+      next(error);
     }
 }
 

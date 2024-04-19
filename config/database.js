@@ -5,11 +5,8 @@ const mongoose = require('mongoose');
 const dbConnection = () => {
   mongoose
     .connect(process.env.DB_URI)
-    .then((conn) => {
-      console.log(`Database connected: ${conn.connection.host}`);
-    })
+    .then(() => {})
     .catch((err) => {
-      console.error(`Database error: ${err}`);
       process.exit(1);
     });
 };

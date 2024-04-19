@@ -13,16 +13,23 @@ app.use('/uploads', express.static('uploads'));
 setupMiddleware(app);
 setupRoutes(app);
 
-const PORT = process.env.PORT || 4000;
+const DEFAULT_PORT = process.env.PORT || 4000;
 
 const startServer = async () => {
+  let port = DEFAULT_PORT;
   try {
     await dbConnection();
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
+    const server = app.listen(port);
+    server.on('error', (error) => {
+      if (error.code === 'EADDRINUSE') {
+        port++;
+        server.close();
+        server.listen(port);
+      } else {
+        console.error("Failed to start server:", error);
+      }
     });
   } catch (error) {
-    console.error("Failed to start server:", error);
   }
 };
 

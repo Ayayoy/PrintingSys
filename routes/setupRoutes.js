@@ -1,10 +1,13 @@
 // routes/setupRoutes.js
 const { errorHandler, notFoundHandler } = require("../middleware/errorMiddleware");
+const { authenticated } = require('../middleware/auth');
 const authRoutes = require("./authRoutes");
 const productRoutes = require("./productRoutes");
 const orderRoutes = require("./orderRoutes");
 
 function setupRoutes(app) {
+
+  app.use(authenticated);
 
   app.use("/auth", authRoutes);
   app.use("/products", productRoutes);
