@@ -12,7 +12,6 @@ function setupMiddleware(app) {
   }
 
   app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
 
   const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,

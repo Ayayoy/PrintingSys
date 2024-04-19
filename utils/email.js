@@ -21,7 +21,7 @@ async function sendEmail({ to, subject, html }) {
         });
 
     } catch (error) {
-      next(error);
+      return false;
     }
 }
 
@@ -71,7 +71,7 @@ const generateEmailContentForUpdateOrderStatus = async (order) => {
           <p>Thank you for choosing us.</p>
         `;
     } catch (error) {
-      next(error);
+      return false;
     }
 };
 
@@ -80,11 +80,11 @@ const generateEmailContentForOrderAccept = async (order) => {
         return `
           <p>Dear User,</p>
           <p>Your order with our printing press has been accepted.</p>
-          <p>Please check the invoice in yout accountو Please pay as soon as possible..</p>
+          <p>Check the invoice in yout account, Please pay as soon as possible..</p>
           <p>Thank you for your order!</p>
         `;
     } catch (error) {
-      next(error);
+      return false;
     }
 };
 
@@ -105,7 +105,7 @@ const sendEmailForOrderUpdateOrderStatus = async (order) => {
     try {
       await sendEmail({ to, subject, html: htmlContent });
     } catch (error) {
-      next(error);
+      return false;
 
     }
 };
@@ -118,7 +118,7 @@ const sendEmailForOrderAccept = async (order) => {
     try {
       await sendEmail({ to, subject, html: htmlContent });
     } catch (error) {
-      next(error);
+      return false;
 
     }
 };
@@ -131,7 +131,7 @@ const sendEmailForOrderDeny = async (order) => {
     try {
       await sendEmail({ to, subject, html: htmlContent });
     } catch (error) {
-      next(error);
+      return false;
 
     }
 };

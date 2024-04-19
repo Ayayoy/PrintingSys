@@ -163,7 +163,8 @@ const acceptOrder = async (req, res, next) => {
 
     await generateInvoice(orderId, totalCost, paymentCode);
 
-    sendEmailForOrderAccept();
+    const userEmail = await getUserEmailById(order.user_id);
+    await sendEmailForOrderAccept({ ...order.toObject(), user_email: userEmail });
 
     res.status(200).json({ message: 'Order accepted successfully' });
   } catch (error) {
