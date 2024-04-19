@@ -26,7 +26,7 @@ async function sendEmail({ to, subject, html }) {
 }
 
 async function sendVerificationEmail(to, verificationToken) {
-    const verificationLink = `http://localhost:4000/auth/verify-email/${verificationToken}`;
+    const verificationLink = `https://printing-sys-fojo.vercel.app/auth/verify-email/${verificationToken}`;
 
     const htmlContent = `
         <p>Dear User,</p>
@@ -40,7 +40,7 @@ async function sendVerificationEmail(to, verificationToken) {
 }
 
 async function sendPasswordResetEmail(to, resetToken) {
-    const resetLink = `http://localhost:4000/auth/reset-password/${resetToken}`;
+    const resetLink = `https://printing-sys-fojo.vercel.app/auth/reset-password/${resetToken}`;
 
     const htmlContent = `
         <p>Dear User,</p>
