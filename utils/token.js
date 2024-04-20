@@ -14,12 +14,21 @@ const generateToken = (user) => {
   });
 };
 
-const generateRandomToken = () => {
-  return crypto.randomBytes(20).toString('hex');
+const generateRandomCode = () => {
+  const length = 6; 
+  const characters = '0123456789';
+  let OTP = '';
+
+  for (let i = 0; i < length; i++) {
+    OTP += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+
+  return OTP;
 };
+
 
 const decodeToken = (token) => {
   return jwt.verify(token, process.env.JWT_SECRET);
 };
 
-module.exports = { generateToken, generateRandomToken, decodeToken };
+module.exports = { generateToken, generateRandomCode, decodeToken };

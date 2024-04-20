@@ -3,54 +3,65 @@ const UserModel = require("../models/user");
 const ProductModel = require("../models/product");
 
 async function sendEmail({ to, subject, html }) {
-    try {
-        let transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.gmail, // sender email address
-                pass: process.env.gmailPass, // sender email password
-            },
-        });
+  try {
+      let transporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth: {
+              user: process.env.gmail,
+              pass: process.env.gmailPass,
+          },
+      });
 
-        // send mail with defined transport object
-        let info = await transporter.sendMail({
-            from: `"Printing Press HU" <${process.env.gmail}>`, // sender address
-            to: to, // recipient email address
-            subject: subject, // email subject
-            html: html, // email content in HTML format
-        });
+      let info = await transporter.sendMail({
+          from: `"Printing Press HU" <${process.env.gmail}>`,
+          to: to,
+          subject: subject,
+          html: html,
+      });
 
-    } catch (error) {
+      return true;
+  } catch (error) {
+      console.error("Failed to send email:", error);
       return false;
-    }
+  }
 }
 
-async function sendVerificationEmail(to, verificationToken) {
-    const verificationLink = `https://printing-sys-fojo.vercel.app/auth/verify-email/${verificationToken}`;
+async function sendVerificationEmail(to, verificationCode, userName) {
+  const htmlContent = `
+      <div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
+          <div style="background-color: #ffffff; border-radius: 10px; padding: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+              <h1 style="color: #007bff; text-align: center;">Welcome, ${userName}!</h1>
+              <p style="font-size: 16px; text-align: center;">Thank you for choosing our service.</p>
+              <p style="font-size: 16px;">To complete your registration, please use the verification code below:</p>
+              <div style="background-color: #007bff; color: #ffffff; padding: 10px; text-align: center; border-radius: 5px; font-size: 24px; margin: 20px auto; max-width: 200px;">${verificationCode}</div>
+              <p style="font-size: 16px;">Your security is important to us. Please do not share this code with anyone else.</p>
+              <p style="font-size: 16px;">Thank you,<br/>The Team</p>
+          </div>
+      </div>
+  `;
 
-    const htmlContent = `
-        <p>Dear User,</p>
-        <p>Please click the following link to verify your email:</p>
-        <a href="${verificationLink}">${verificationLink}</a>
-    `;
+  const subject = 'Email Verification';
 
-    const subject = 'Email Verification';
-
-    return await sendEmail({ to, subject, html: htmlContent });
+  return await sendEmail({ to, subject, html: htmlContent });
 }
 
-async function sendPasswordResetEmail(to, resetToken) {
-    const resetLink = `https://printing-sys-fojo.vercel.app/auth/reset-password/${resetToken}`;
+async function sendPasswordResetEmail(to, resetCode) {
+  const htmlContent = `
+      <div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
+          <div style="background-color: #ffffff; border-radius: 10px; padding: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+              <h1 style="color: #007bff; text-align: center;">Password Reset</h1>
+              <p style="font-size: 16px; text-align: center;">You have requested to reset your password.</p>
+              <p style="font-size: 16px;">Please use the reset code below:</p>
+              <div style="background-color: #007bff; color: #ffffff; padding: 10px; text-align: center; border-radius: 5px; font-size: 24px; margin: 20px auto; max-width: 200px;">${resetCode}</div>
+              <p style="font-size: 16px;">If you did not request this password reset, please ignore this email.</p>
+              <p style="font-size: 16px;">Thank you,<br/>The Team</p>
+          </div>
+      </div>
+  `;
 
-    const htmlContent = `
-        <p>Dear User,</p>
-        <p>Please click the following link to reset your password:</p>
-        <a href="${resetLink}">${resetLink}</a>
-    `;
+  const subject = 'Password Reset';
 
-    const subject = 'Password Reset';
-
-    return await sendEmail({ to, subject, html: htmlContent });
+  return await sendEmail({ to, subject, html: htmlContent });
 }
 
 const generateEmailContentForUpdateOrderStatus = async (order) => {

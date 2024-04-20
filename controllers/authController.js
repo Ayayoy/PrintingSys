@@ -2,7 +2,7 @@
 const UserModel = require("../models/user");
 const { comparePassword } = require("../models/dbMethods/userMethods");
 const { sendVerificationEmail, sendPasswordResetEmail } = require("../utils/email");
-const { generateToken, generateRandomToken } = require("../utils/token");
+const { generateToken, generateRandomCode } = require("../utils/token");
 const jwt = require("jsonwebtoken");
 const { revokedTokens } = require("../middleware/auth");
 
@@ -11,20 +11,20 @@ const register = async (req, res, next) => {
   try {
     const { username, password, email, phoneNumber } = req.body;
 
-    const verificationToken = generateRandomToken();
+    const verificationCode = generateRandomCode();
 
     const newUser = await UserModel.create({
       username,
       password,
       email,
       phoneNumber,
-      verificationToken,
+      verificationCode
     });
 
     if (!newUser) {
       throw new Error("Failed to register user.");
     }
-    const emailPromise = sendVerificationEmail(email, verificationToken);
+    const emailPromise = sendVerificationEmail(email, verificationCode, username);
 
     await Promise.all([newUser, emailPromise]);
 
@@ -39,18 +39,17 @@ const register = async (req, res, next) => {
 
 const verifyEmail = async (req, res, next) => {
   try {
-    const { token } = req.params;
+    const { code } = req.body;
 
-    const user = await UserModel.findOne({ verificationToken: token });
+    const user = await UserModel.findOne({ verificationCode: code });
 
-    if (user.verificationToken !== token) {
-      return res.status(400).json({ message: "Invalid verification token." });
+    if (user.verificationCode !== code) {
+      return res.status(400).json({ message: "Invalid verification code." });
     }
 
     user.emailVerified = true;
-    user.verificationToken = undefined;
+    user.verificationCode = undefined;
     await user.save();
-
     res.status(200).json({ message: "Email verification successful." });
   } catch (error) {
     next(error);
@@ -118,18 +117,12 @@ const forgotPassword = async (req, res, next) => {
       return res.status(404).json({ message: "User not found." });
     }
 
-    // Generate a verification token for resetting password
-    const resetToken = generateRandomToken();
-    user.verificationToken = resetToken;
+    const resetCode = generateRandomCode();
+    user.verificationCode = resetCode;
 
     await user.save();
 
-    // Send password reset email
-    const emailSent = await sendPasswordResetEmail(email, resetToken);
-
-    if (!emailSent) {
-      throw new Error("Failed to send password reset email.");
-    }
+    await sendPasswordResetEmail(email, resetCode);
 
     res.status(200).json({
       message: "Password reset email sent. Please check your email.",
@@ -139,19 +132,44 @@ const forgotPassword = async (req, res, next) => {
   }
 };
 
+const { verifyResetCode } = async (req, res, next) => {
+  try {
+    const { email, code } = req.body;
+
+    const user = await UserModel.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    if (user.verificationCode !== code) {
+      return res.status(400).json({ message: "Invalid reset code." });
+    }
+
+
+    res.status(200).json({ message: "Reset code verified successfully." });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const resetPassword = async (req, res, next) => {
   try {
-    const { token } = req.params;
-    const { newPassword } = req.body;
+    const { email, resetCode, newPassword } = req.body;
 
-    const user = await UserModel.findOne({ verificationToken: token });
+    const user = await UserModel.findOne({ email });
+
     if (!user) {
-      return res.status(404).json({ message: "Invalid or expired token." });
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    if(resetCode != user.verificationCode) {
+      return res.status(404).json({ message: "invalid verification Code." });
     }
 
     user.password = newPassword;
 
-    user.verificationToken = undefined;
+    user.verificationCode = undefined;
     await user.save();
 
     res.status(200).json({ message: "Password reset successful." });

@@ -8,10 +8,10 @@ const validatorMiddleware = require("../middleware/validatorMiddleware");
 
 router.post("/register",              registerValidator,   authController.register);
 router.post("/login",                 loginValidator,      authController.login);
-router.get("/verify-email/:token",     authController.verifyEmail);
+router.post("/verify-email",     authController.verifyEmail);
 router.post("/logout",                 authController.logout);
 router.post("/forgot-password",        authController.forgotPassword);
-router.post("/reset-password/:token",  authController.resetPassword);
+router.post("/reset-password",  authController.resetPassword);
 router.get("/protected",               authController.protected);
 
 module.exports = router;
