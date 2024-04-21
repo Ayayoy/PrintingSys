@@ -65,47 +65,52 @@ async function sendPasswordResetEmail(to, resetCode) {
 }
 
 const generateEmailContentForUpdateOrderStatus = async (order) => {
-    try {
-        // Fetch the product details using product_id from the order
-        const product = await ProductModel.findById(order.product.product_id).exec();
-        const productName = product ? product.name : 'Unknown Product'; // Get product name
+  try {
+    const product = await ProductModel.findById(order.product.product_id).exec();
+    const productName = product ? product.name : 'Unknown Product';
 
-        return `
-          <p>Dear User,</p>
-          <p>Your order status with ID ${order._id} has been updated.</p>
-          <p>Details:</p>
-          <ul>
-            <li>Product: ${productName}</li> <!-- Use product name -->
-            <li>Quantity: ${order.product.quantity}</li>
-            <li>Status: ${order.status}</li>
-          </ul>
-          <p>Thank you for choosing us.</p>
-        `;
-    } catch (error) {
-      return false;
-    }
+    return `
+      <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; border: 2px solid #ccc;">
+        <p style="font-size: 16px;">Dear Customer,</p>
+        <p style="font-size: 14px;">We're writing to inform you that the status of your order with ID ${order._id} has been updated.</p>
+        <p style="font-size: 14px;">Order Details:</p>
+        <ul style="font-size: 14px;">
+          <li>Product: ${productName}</li>
+          <li>Quantity: ${order.product.quantity}</li>
+          <li>Status: ${order.status}</li>
+        </ul>
+        <p style="font-size: 14px;">Thank you for choosing us.</p>
+      </div>
+    `;
+  } catch (error) {
+    return false;
+  }
 };
 
 const generateEmailContentForOrderAccept = async (order) => {
-    try {
-        return `
-          <p>Dear User,</p>
-          <p>Your order with our printing press has been accepted.</p>
-          <p>Check the invoice in yout account, Please pay as soon as possible..</p>
-          <p>Thank you for your order!</p>
-        `;
-    } catch (error) {
-      return false;
-    }
+  try {
+    return `
+      <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; border: 2px solid #ccc;">
+        <p style="font-size: 16px;">Dear Customer,</p>
+        <p style="font-size: 14px;">We are pleased to inform you that your order with Printing Press HU has been accepted.</p>
+        <p style="font-size: 14px;">Please review the invoice in your account and proceed with payment at your earliest convenience.</p>
+        <p style="font-size: 14px;">Thank you for choosing our services!</p>
+      </div>
+    `;
+  } catch (error) {
+    return false;
+  }
 };
 
 const generateEmailContentForOrderDeny = (order) => {
-    return `
-      <p>Dear User,</p>
-      <p>We regret to inform you that your order with ID ${order._id} has been denied.</p>
-      <p>If you have any questions, please feel free to contact us.</p>
-      <p>Thank you for your understanding.</p>
-    `;
+  return `
+    <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; border: 2px solid #ccc;">
+      <p style="font-size: 16px;">Dear Customer,</p>
+      <p style="font-size: 14px;">We regret to inform you that your order with ID ${order._id} has been denied.</p>
+      <p style="font-size: 14px;">If you have any queries, please don't hesitate to contact us.</p>
+      <p style="font-size: 14px;">Thank you for your understanding.</p>
+    </div>
+  `;
 };
   
 const sendEmailForOrderUpdateOrderStatus = async (order) => {
@@ -147,20 +152,22 @@ const sendEmailForOrderDeny = async (order) => {
     }
 };
 
-async function sendAdminMessageEmail({ to, message }) {
-    const subject = 'Message from Admin';
-    const htmlContent = `
-        <p>Dear User,</p>
-        <p>${message}</p>
-        <p>Please take necessary action accordingly.</p>
-    `;
+const sendAdminMessageEmail = async ({ to, message }) => {
+  const subject = 'Message from Admin';
+  const htmlContent = `
+    <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; border: 2px solid #ccc;">
+      <p style="font-size: 16px;">Dear User,</p>
+      <p style="font-size: 14px;">${message}</p>
+      <p style="font-size: 14px;">Please take necessary action accordingly.</p>
+    </div>
+  `;
 
-    try {
-        await sendEmail({ to, subject, html: htmlContent });
-    } catch (error) {
-      next(error);
-    }
-}
+  try {
+    await sendEmail({ to, subject, html: htmlContent });
+  } catch (error) {
+    next(error);
+  }
+};
   
 async function getUserEmailById(userId) {
     try {
