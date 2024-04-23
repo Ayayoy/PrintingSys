@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const productController = require('../controllers/productController');
-const { isAdmin } = require('../middleware/auth');
+const { authenticated, isAdmin } = require('../middleware/auth');
 const paginateMiddleware = require("../middleware/paginateMiddleware");
 const ProductModel = require("../models/product");
 const upload = require('../utils/fileUpload');
