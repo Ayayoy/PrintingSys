@@ -3,7 +3,6 @@ const validatorMiddleware = require("../../middleware/validatorMiddleware");
 const Product = require("../../models/product");
 
 const createOrderValidator = [
-  body('user_id').notEmpty().withMessage('User ID is required.'),
   body('product.product_id').notEmpty().withMessage('Product ID is required.'),
   body('product.quantity').notEmpty().withMessage('Quantity is required.').isInt({ min: 1 }).withMessage('Quantity must be at least 1.'),
   body('product.File').optional(),

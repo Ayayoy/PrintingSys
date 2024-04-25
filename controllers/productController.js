@@ -13,6 +13,8 @@ const createProduct = async (req, res, next) => {
 
     await product.save();
 
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+
     res.status(201).json({ message: "Product created successfully"});
   } catch (error) {
     next(error);
@@ -21,12 +23,12 @@ const createProduct = async (req, res, next) => {
 
 const getAllProducts = async (req, res, next) => {
   try {
-    const products = await Product.find({ deleted: false }).select('name description image');
+    const products = await Product.find({ deleted: false }).select('_id name description image');
     if (!products || products.length === 0) {
       return res.status(404).json({ success: false, message: "No Products not found" });
     }
        
-    res.status(200).json({ data: products });
+    res.status(200).json({ message: "Products fetched successfully", data: products });
   } catch (error) {
     next(error);
   }
@@ -34,12 +36,12 @@ const getAllProducts = async (req, res, next) => {
 
 const getDeletedProducts = async (req, res, next) => {
   try {
-    const deletedProducts = await Product.find({ deleted: true }).select('name description image');
+    const deletedProducts = await Product.find({ deleted: true }).select('_id name description image');
     if (!deletedProducts || deletedProducts.length === 0 ) {
       return res.status(404).json({ success: false, message: "Not Deleted Products not found" });
     }
     
-    res.status(200).json({ data: deletedProducts });
+    res.status(200).json({ message: "Deleted Products fetched successfully", data: deletedProducts });
   } catch (error) {
     next(error);
   }
@@ -52,7 +54,7 @@ const getProductById = async (req, res, next) => {
     if (!product) {
       return res.status(404).json({ success: false, message: "Product not found" });
     }
-    res.status(200).json({ data: product });
+    res.status(200).json({ message: "Product fetched successfully", data: product });
   } catch (error) {
     next(error);
   }
@@ -72,6 +74,8 @@ const updateProduct = async (req, res, next) => {
     if (!updatedProduct) {
       return res.status(404).json({ message: "Product not found" });
     }
+
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
 
     res.status(200).json({ message: "Product updated successfully" });
   } catch (error) {
@@ -121,7 +125,7 @@ const searchProducts = async (req, res, next) => {
       return res.status(404).json({ message: 'No products found for the given query.' });
     }
     
-    res.status(200).json({ data: products });
+    res.status(200).json({ message: "Products fetched successfully", data: products });
   } catch (error) {
     next(error);
   }

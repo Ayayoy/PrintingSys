@@ -8,15 +8,18 @@ const {
   getUserEmailById
 } = require("../utils/email");
 const { generateInvoice } = require('./invoiceController');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
+const { generateToken, decodeToken } = require('../utils/token');
 
 
 const getAllOrders = async (req, res, next) => {
   try {
-    const orders = await OrderModel.find({ accepted: false }).select('user_id product status createdAt updatedAt').exec();
+    const orders = await OrderModel.find({ accepted: false }).select('_id user_id product status createdAt updatedAt').exec();
     if (!orders || orders.length === 0) {
       return res.status(404).json({ message: 'No orders found.' });
     }
-    res.status(200).json(orders);
+    res.status(200).json({ message: 'Orders fetched successfully', data: orders });
   } catch (error) {
     next(error);
   }
@@ -24,11 +27,11 @@ const getAllOrders = async (req, res, next) => {
 
 const getAllAcceptedOrders = async (req, res, next) => {
   try {
-    const orders = await OrderModel.find({ accepted: true }).select('user_id product status createdAt updatedAt').exec();
+    const orders = await OrderModel.find({ accepted: true }).select('_id user_id product status createdAt updatedAt').exec();
     if (!orders || orders.length === 0) {
       return res.status(404).json({ message: 'No accepted orders found.' });
     }
-    res.status(200).json(orders);
+    res.status(200).json({ message: 'Accepted orders fetched successfully', data: orders });
   } catch (error) {
     next(error);
   }
@@ -37,13 +40,13 @@ const getAllAcceptedOrders = async (req, res, next) => {
 const getOrderHistory = async (req, res, next) => {
   try {
     const userId = req.params.user_id;
-    const orders = await OrderModel.find({ user_id: userId }).select('product status createdAt updatedAt').exec();
+    const orders = await OrderModel.find({ user_id: userId }).select('_id product status createdAt updatedAt').exec();
     
     if (!orders || orders.length === 0) {
       return res.status(404).json({ message: 'No orders found for this user.' });
     }
     
-    res.status(200).json(orders);
+    res.status(200).json({ message: 'Order history fetched successfully', data: orders });
   } catch (error) {
     next(error);
   }
@@ -60,11 +63,7 @@ const getOrderById = async (req, res, next) => {
       return res.status(404).json({ error: 'Order not found' });
     }
 
-    const adminMessage = order.adminMessage || 'Not found';
-
-    const orderWithAdminMessage = { ...order._doc, adminMessage };
-
-    res.status(200).json(orderWithAdminMessage);
+    res.status(200).json({ message: 'Order fetched successfully', data: order });
   } catch (error) {
     next(error);
   }
@@ -72,7 +71,14 @@ const getOrderById = async (req, res, next) => {
 
 const createOrder = async (req, res, next) => {
   try {
-    let { user_id, product: { product_id, quantity, data } } = req.body;
+    const token = req.headers.authorization;
+    const tokenParts = token.split(' ');
+    const jwtToken = tokenParts[1];
+
+    let decodedToken = decodeToken(jwtToken);
+    const user_id = decodedToken.userId;
+
+    const { product: { product_id, quantity, data } } = req.body;
 
     if (!req.file || !req.file.path) {
       return res.status(400).json({ error: 'File is required' });
@@ -82,7 +88,8 @@ const createOrder = async (req, res, next) => {
     const product = { product_id, quantity, File: filePath, data };
 
     const newOrder = await OrderModel.create({ user_id, product });
-    res.status(201).json(newOrder);
+    
+    res.status(201).json({ message: 'Order created successfully', data: newOrder });
   } catch (error) {
     next(error);
   }
@@ -91,40 +98,34 @@ const createOrder = async (req, res, next) => {
 const updateOrder = async (req, res, next) => {
   try {
     const orderId = req.params.id;
-    const updateData = req.body;
+    const updateData = req.body.product;
 
     const order = await OrderModel.findById(orderId);
 
-    if (!order) {
-      return res.status(404).json({ error: 'Order not found' });
-    }
-
-    if (!order.product || !Array.isArray(order.product.data)) {
-      return res.status(400).json({ error: 'Product data is missing or invalid' });
-    }
-
-    if (updateData.product && updateData.product.data && updateData.product.data.length > 0) {
-      const { data } = updateData.product;
-      const { index, value } = data[0] || {};
-      
-      if (index === undefined || index < 0 || index >= order.product.data.length) {
-        return res.status(400).json({ error: 'Invalid data index' });
-      }
-
-      order.product.data[index].value = value;
-    }
-    
     if (req.file) {
       order.product.File = req.file.path;
     }
 
-    if (updateData.product && updateData.product.quantity) {
-      order.product.quantity = updateData.product.quantity;
+    if (updateData) {
+      if (updateData.quantity) {
+        order.product.quantity = updateData.quantity;
+      }
+      if (updateData.File) {
+        order.product.File = updateData.File;
+      }
+      if (updateData.data) {
+        updateData.data.forEach(item => {
+          const index = item.index;
+          if (index !== undefined && index >= 0 && index < order.product.data.length) {
+            order.product.data[index].value = item.value;
+          }
+        });
+      }
     }
 
     const updatedOrder = await order.save();
 
-    res.status(200).json({ message: 'Order updated successfully'});
+    res.status(200).json({ message: 'Order updated successfully' });
   } catch (error) {
     next(error);
   }

@@ -83,7 +83,7 @@ const login = async (req, res, next) => {
 
     delete user._doc.password;
 
-    res.status(200).json({ token });
+    res.status(200).json({ message: "Login successful.", token });
   } catch (error) {
     next(error);
   }
