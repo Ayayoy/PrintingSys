@@ -88,7 +88,9 @@ const createOrder = async (req, res, next) => {
     const product = { product_id, quantity, File: filePath, data };
 
     const newOrder = await OrderModel.create({ user_id, product });
-    
+
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+
     res.status(201).json({ message: 'Order created successfully', data: newOrder });
   } catch (error) {
     next(error);
@@ -124,6 +126,8 @@ const updateOrder = async (req, res, next) => {
     }
 
     const updatedOrder = await order.save();
+
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
 
     res.status(200).json({ message: 'Order updated successfully' });
   } catch (error) {
@@ -208,6 +212,8 @@ const UpdateOrderStatus = async (req, res, next) => {
     const userEmail = await getUserEmailById(order.user_id);
     await sendEmailForOrderUpdateOrderStatus({ ...order.toObject(), user_email: userEmail });
 
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+
     res.status(200).json({ message: `The status changed successfully to "${newStatus}"` });
   } catch (error) {
     next(error);
@@ -227,15 +233,14 @@ const sendAdminMessage = async (req, res, next) => {
       return res.status(404).json({ error: 'Order not found' });
     }
 
-    // Get user email associated with the order
     const userEmail = await getUserEmailById(order.user_id);
 
-    // Send admin message email
     await sendAdminMessageEmail({ to: userEmail, message });
 
-    // Update admin message in the order model
     order.adminMessage = message;
     await order.save();
+    
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
 
     res.status(200).json({ message: 'Message sent successfully' });
   } catch (error) {
