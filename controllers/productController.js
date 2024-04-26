@@ -11,9 +11,9 @@ const createProduct = async (req, res, next) => {
 
     const imageUrl = await upload(file, { folder: `${process.env.APP_Name}/products` });
 
-    const product = await Product.create({ ...req.body, image: imageUrl });
+    await Product.create({ ...req.body, image: imageUrl });
 
-    res.status(201).json({ message: "Product created successfully", data: product });
+    res.status(201).json({ message: "Product created successfully"});
   } catch (error) {
     next(error);
   }
@@ -72,7 +72,7 @@ const updateProduct = async (req, res, next) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    res.status(200).json({ message: "Product updated successfully", data: updatedProduct });
+    res.status(200).json({ message: "Product updated successfully" });
   } catch (error) {
     next(error);
   }

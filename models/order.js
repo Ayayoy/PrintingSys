@@ -20,7 +20,7 @@ const orderSchema = new Schema({
     },
     file: {
       type: String,
-       required: [true, "File is required."]
+      //  required: [true, "File is required."]
     },
     data: [{
       field_name: {

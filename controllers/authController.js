@@ -10,17 +10,17 @@ const register = async (req, res, next) => {
   try {
     const { username, password, email, phoneNumber } = req.body;
 
-    const { code } = generateRandomCode();
+    const code = generateRandomCode();
 
     const newUser = await UserModel.create({
       username,
       password,
       email,
       phoneNumber,
-      verificationCode: code,
+      verificationCode: code.toString(), // Ensure verificationCode is saved as string
     });
 
-    await sendVerificationEmail(email, code, username);
+    await sendVerificationEmail(email, code.toString(), username); // Ensure verificationCode is passed as string
 
     res.status(201).json({
       message: "User registered successfully. Please check your email for verification."
@@ -99,7 +99,7 @@ const forgotPassword = async (req, res, next) => {
       return res.status(404).json({ message: "User not found." });
     }
 
-    const resetCode = generateRandomCode();
+    const resetCode = generateRandomCode().toString();
     user.verificationCode = resetCode;
 
     await user.save();

@@ -38,7 +38,6 @@ const validateProductData = async (productId, field_name, value) => {
 const createOrderValidator = [
   body('product.product_id').notEmpty().withMessage('Product ID is required.'),
   body('product.quantity').notEmpty().withMessage('Quantity is required.').isInt({ min: 1 }).withMessage('Quantity must be at least 1.'),
-  body('product.File').optional(),
   body('product.data').isArray({ min: 1 }).withMessage('Product data must be an array.'),
   body('product.data.*.field_name').notEmpty().withMessage('Field name is required for each element in product data.'),
   body('product.data.*.value').custom(async (value, { req }) => {

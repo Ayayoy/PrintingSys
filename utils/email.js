@@ -27,7 +27,8 @@ async function sendEmail({ to, subject, html }) {
 }
 
 async function sendVerificationEmail(to, verificationCode, userName) {
-  const htmlContent = `
+  try {
+    const htmlContent = `
       <div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
           <div style="background-color: #ffffff; border-radius: 10px; padding: 20px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
               <h1 style="color: #007bff; text-align: center;">Welcome, ${userName}!</h1>
@@ -38,12 +39,20 @@ async function sendVerificationEmail(to, verificationCode, userName) {
               <p style="font-size: 16px;">Thank you,<br/>The Team</p>
           </div>
       </div>
-  `;
+    `;
 
-  const subject = 'Email Verification';
+    const subject = 'Email Verification';
 
-  return await sendEmail({ to, subject, html: htmlContent });
+    // Send email
+    await sendEmail({ to, subject, html: htmlContent });
+
+    return true; // Email sent successfully
+  } catch (error) {
+    console.error("Failed to send verification email:", error);
+    return false; // Failed to send email
+  }
 }
+
 
 async function sendPasswordResetEmail(to, resetCode) {
   const htmlContent = `
