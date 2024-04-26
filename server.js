@@ -8,7 +8,7 @@ dotenv.config({ path: "config/config.env" });
 
 const app = express();
 
-app.use('/uploads', express.static('uploads'));
+app.use(express.static('uploads'));
 
 setupMiddleware(app);
 setupRoutes(app);

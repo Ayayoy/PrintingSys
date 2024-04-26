@@ -11,6 +11,7 @@ const { generateInvoice } = require('./invoiceController');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const { generateToken, decodeToken } = require('../utils/token');
+const upload = require("../utils/cloudinary");
 
 
 const getAllOrders = async (req, res, next) => {
@@ -80,19 +81,27 @@ const createOrder = async (req, res, next) => {
 
     const { product: { product_id, quantity, data } } = req.body;
 
+    // Check if a file is provided in the request
     if (!req.file || !req.file.path) {
       return res.status(400).json({ error: 'File is required' });
     }
-    const filePath = req.file.path;
 
-    const product = { product_id, quantity, File: filePath, data };
+    // Proceed with file upload to Cloudinary
+    const fileUrl = await upload(req.file, {
+      folder: `${process.env.APP_Name}/orders`,
+      resource_type: "auto"
+    });
 
+    // Construct product object with uploaded file URL
+    const product = { product_id, quantity, file: fileUrl, data };
+
+    // Create a new order with the product
     const newOrder = await OrderModel.create({ user_id, product });
 
-    res.setHeader('Content-Type', 'application/json; charset=utf-8');
-
+    // Send success response with the created order data
     res.status(201).json({ message: 'Order created successfully', data: newOrder });
   } catch (error) {
+    // Pass any errors to the error handling middleware
     next(error);
   }
 };
@@ -104,17 +113,23 @@ const updateOrder = async (req, res, next) => {
 
     const order = await OrderModel.findById(orderId);
 
-    if (req.file) {
-      order.product.File = req.file.path;
+    if (req.file && req.file.path) {
+      // Upload the file to Cloudinary
+      const uploadedFile = await upload(req.file, { folder: `${process.env.APP_NAME}/orders` });
+
+      // Set the uploaded file URL to the order
+      order.product.File = uploadedFile;
     }
 
     if (updateData) {
       if (updateData.quantity) {
         order.product.quantity = updateData.quantity;
       }
+
       if (updateData.File) {
         order.product.File = updateData.File;
       }
+
       if (updateData.data) {
         updateData.data.forEach(item => {
           const index = item.index;
@@ -125,12 +140,14 @@ const updateOrder = async (req, res, next) => {
       }
     }
 
+    // Save the updated order
     const updatedOrder = await order.save();
 
+    // Send response
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
-
     res.status(200).json({ message: 'Order updated successfully' });
   } catch (error) {
+    // Pass any errors to the error handling middleware
     next(error);
   }
 };

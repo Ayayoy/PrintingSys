@@ -18,9 +18,9 @@ const orderSchema = new Schema({
       required: [true, "Quantity is required."],
       min: [1, "Quantity must be at least 1."]
     },
-    File: {
+    file: {
       type: String,
-      //  required: [true, "File is required."]
+       required: [true, "File is required."]
     },
     data: [{
       field_name: {

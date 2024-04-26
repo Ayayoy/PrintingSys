@@ -1,25 +1,21 @@
 const Product = require("../models/product");
-const fs = require('fs');
+const cloudinary = require("../utils/cloudinary");
 
 const createProduct = async (req, res, next) => {
   try {
-    
     if (!req.file) {
       return res.status(400).json({ message: "Please upload an image." });
     }
-    
+
+    const { secure_url, public_id } = await cloudinary.uploader.upload(req.file.path, { folder: `${process.env.APP_Name}/products` });
+
     const productData = req.body;
-    productData.image = req.file.path;
-    
-    if (!fs.existsSync(productData.image)) {
-      return res.status(404).json({ message: "File not found" });
-    }
+    productData.image = secure_url;
 
     const product = new Product(productData);
     await product.save();
 
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
-
     res.status(201).json({ message: "Product created successfully"});
   } catch (error) {
     next(error);
@@ -71,7 +67,9 @@ const updateProduct = async (req, res, next) => {
     let productData = req.body;
 
     if (req.file && req.file.path) {
-      productData.image = req.file.path;
+      const { secure_url, public_id } = await cloudinary.uploader.upload(req.file.path, { folder: `${process.env.APP_Name}/products` });
+      
+      productData.image = secure_url;
     }
 
     const updatedProduct = await Product.findByIdAndUpdate(productId, productData, { new: true });
@@ -81,7 +79,6 @@ const updateProduct = async (req, res, next) => {
     }
 
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
-
     res.status(200).json({ message: "Product updated successfully" });
   } catch (error) {
     next(error);
