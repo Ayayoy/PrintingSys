@@ -1,4 +1,3 @@
-//utils/token.js
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 require('dotenv').config();
@@ -15,17 +14,21 @@ const generateToken = (user) => {
 };
 
 const generateRandomCode = () => {
-  const length = 6; 
+  const length = 6;
   const characters = '0123456789';
-  let OTP = '';
 
+  // Generate cryptographically strong pseudo-random data
+  const randomBytes = crypto.randomBytes(length);
+  
+  // Convert randomBytes to a string of characters from 'characters'
+  let OTP = '';
   for (let i = 0; i < length; i++) {
-    OTP += characters.charAt(Math.floor(Math.random() * characters.length));
+    const index = randomBytes[i] % characters.length;
+    OTP += characters.charAt(index);
   }
 
   return OTP;
 };
-
 
 const decodeToken = (token) => {
   return jwt.verify(token, process.env.JWT_SECRET);

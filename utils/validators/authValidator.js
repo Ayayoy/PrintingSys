@@ -12,7 +12,7 @@ exports.registerValidator = [
     .notEmpty().withMessage("Email required").bail()
     .trim()
     .isEmail().withMessage("Invalid email address")
-    .custom(async (value, { req }) => {
+    .custom(async (value) => {
       const user = await User.findOne({ email: value });
       if (user) {
         throw new Error("Email already in use.");

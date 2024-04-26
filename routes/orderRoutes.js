@@ -5,14 +5,14 @@ const orderController = require('../controllers/orderController');
 const invoiceController = require('../controllers/invoiceController'); 
 const { authenticated, isAdmin } = require('../middleware/auth');
 const { createOrderValidator, updateOrderValidator } = require('../utils/validators/orderValidator');
-const { orderUpload } = require('../utils/fileUpload');
+const upload = require('../utils/fileUpload');
 
 router.get('/', isAdmin, orderController.getAllOrders);
 router.get('/acceptedOrders', isAdmin, orderController.getAllAcceptedOrders);
 router.get('/orderHistory/:user_id', authenticated, orderController.getOrderHistory);
 router.get('/:id', authenticated, orderController.getOrderById);
-router.post('/create', authenticated, orderUpload.single('product[File]'), createOrderValidator, orderController.createOrder);
-router.put('/:id', authenticated, orderUpload.single('product[File]'), updateOrderValidator, orderController.updateOrder);
+router.post('/create', authenticated, upload.order.single('product[File]'), createOrderValidator, orderController.createOrder);
+router.put('/:id', authenticated, upload.order.single('product[File]'), updateOrderValidator, orderController.updateOrder);
 router.delete('/:id', authenticated, orderController.deleteOrder);
 router.put('/:id/accept', isAdmin, orderController.acceptOrder);
 router.delete('/:id/deny', isAdmin, orderController.denyOrder);

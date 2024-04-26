@@ -5,14 +5,8 @@ const errorHandler = (err, req, res, next) => {
 
   if (err.name === 'ValidationError') {
     status = 400;
-    if (Array.isArray(err.errors)) {
-      message = err.errors.map(error => error.msg).join(', ');
-    } else {
-      message = err.message; // Use the original error message if err.errors is not an array
-    }
-  }
-
-  if (err.name === 'MongoError') {
+    message = Array.isArray(err.errors) ? err.errors.map(error => error.msg).join(', ') : err.message;
+  } else if (err.name === 'MongoError') {
     status = 500;
     message = "Database Error: An error occurred while accessing the database.";
   }
@@ -28,3 +22,4 @@ const notFoundHandler = (req, res, next) => {
 };
 
 module.exports = { errorHandler, notFoundHandler };
+

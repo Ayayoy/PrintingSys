@@ -7,7 +7,7 @@ async function hashPassword(password) {
 }
 
 async function comparePassword(candidatePassword, hashedPassword) {
-  return bcrypt.compare(candidatePassword, hashedPassword);
+  return await bcrypt.compare(candidatePassword, hashedPassword);
 }
 
 module.exports = {

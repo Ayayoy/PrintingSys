@@ -1,22 +1,13 @@
 //controllers/OrderController
 const OrderModel = require("../models/order");
-const {
-  sendEmailForOrderAccept,
-  sendEmailForOrderDeny,
-  sendEmailForOrderUpdateOrderStatus,
-  sendAdminMessageEmail,
-  getUserEmailById
-} = require("../utils/email");
 const { generateInvoice } = require('./invoiceController');
-const jwt = require('jsonwebtoken');
-require('dotenv').config();
-const { generateToken, decodeToken } = require('../utils/token');
-const upload = require("../utils/cloudinary");
-
+const { sendEmailForOrderAccept, sendEmailForOrderDeny, sendEmailForOrderUpdateOrderStatus, sendAdminMessageEmail, getUserEmailById } = require("../utils/email");
+const { decodeToken } = require('../utils/token');
+const upload = require("../utils/upload");
 
 const getAllOrders = async (req, res, next) => {
   try {
-    const orders = await OrderModel.find({ accepted: false }).select('_id user_id product status createdAt updatedAt').exec();
+    const orders = await OrderModel.find({ accepted: false }, '_id user_id product status createdAt updatedAt').exec();
     if (!orders || orders.length === 0) {
       return res.status(404).json({ message: 'No orders found.' });
     }
@@ -28,7 +19,7 @@ const getAllOrders = async (req, res, next) => {
 
 const getAllAcceptedOrders = async (req, res, next) => {
   try {
-    const orders = await OrderModel.find({ accepted: true }).select('_id user_id product status createdAt updatedAt').exec();
+    const orders = await OrderModel.find({ accepted: true }, '_id user_id product status createdAt updatedAt').exec();
     if (!orders || orders.length === 0) {
       return res.status(404).json({ message: 'No accepted orders found.' });
     }
@@ -41,7 +32,7 @@ const getAllAcceptedOrders = async (req, res, next) => {
 const getOrderHistory = async (req, res, next) => {
   try {
     const userId = req.params.user_id;
-    const orders = await OrderModel.find({ user_id: userId }).select('_id product status createdAt updatedAt').exec();
+    const orders = await OrderModel.find({ user_id: userId }, '_id product status createdAt updatedAt').exec();
     
     if (!orders || orders.length === 0) {
       return res.status(404).json({ message: 'No orders found for this user.' });
@@ -76,32 +67,26 @@ const createOrder = async (req, res, next) => {
     const tokenParts = token.split(' ');
     const jwtToken = tokenParts[1];
 
-    let decodedToken = decodeToken(jwtToken);
+    const decodedToken = decodeToken(jwtToken);
     const user_id = decodedToken.userId;
 
     const { product: { product_id, quantity, data } } = req.body;
 
-    // Check if a file is provided in the request
     if (!req.file || !req.file.path) {
       return res.status(400).json({ error: 'File is required' });
     }
 
-    // Proceed with file upload to Cloudinary
     const fileUrl = await upload(req.file, {
-      folder: `${process.env.APP_Name}/orders`,
+      folder: `${process.env.APP_NAME}/orders`,
       resource_type: "auto"
     });
 
-    // Construct product object with uploaded file URL
     const product = { product_id, quantity, file: fileUrl, data };
 
-    // Create a new order with the product
     const newOrder = await OrderModel.create({ user_id, product });
 
-    // Send success response with the created order data
     res.status(201).json({ message: 'Order created successfully', data: newOrder });
   } catch (error) {
-    // Pass any errors to the error handling middleware
     next(error);
   }
 };
@@ -114,11 +99,8 @@ const updateOrder = async (req, res, next) => {
     const order = await OrderModel.findById(orderId);
 
     if (req.file && req.file.path) {
-      // Upload the file to Cloudinary
       const uploadedFile = await upload(req.file, { folder: `${process.env.APP_NAME}/orders` });
-
-      // Set the uploaded file URL to the order
-      order.product.File = uploadedFile;
+      order.product.file = uploadedFile;
     }
 
     if (updateData) {
@@ -126,8 +108,8 @@ const updateOrder = async (req, res, next) => {
         order.product.quantity = updateData.quantity;
       }
 
-      if (updateData.File) {
-        order.product.File = updateData.File;
+      if (updateData.file) {
+        order.product.file = updateData.file;
       }
 
       if (updateData.data) {
@@ -140,14 +122,10 @@ const updateOrder = async (req, res, next) => {
       }
     }
 
-    // Save the updated order
-    const updatedOrder = await order.save();
+    await order.save();
 
-    // Send response
-    res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.status(200).json({ message: 'Order updated successfully' });
   } catch (error) {
-    // Pass any errors to the error handling middleware
     next(error);
   }
 };
@@ -229,8 +207,6 @@ const UpdateOrderStatus = async (req, res, next) => {
     const userEmail = await getUserEmailById(order.user_id);
     await sendEmailForOrderUpdateOrderStatus({ ...order.toObject(), user_email: userEmail });
 
-    res.setHeader('Content-Type', 'application/json; charset=utf-8');
-
     res.status(200).json({ message: `The status changed successfully to "${newStatus}"` });
   } catch (error) {
     next(error);
@@ -257,8 +233,6 @@ const sendAdminMessage = async (req, res, next) => {
     order.adminMessage = message;
     await order.save();
     
-    res.setHeader('Content-Type', 'application/json; charset=utf-8');
-
     res.status(200).json({ message: 'Message sent successfully' });
   } catch (error) {
     next(error);

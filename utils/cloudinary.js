@@ -14,20 +14,3 @@ cloudinary.config({
 });
 
 module.exports = cloudinary;
-
-const allowedFileTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-
-const upload = async (file, options = {}) => {
-    try {
-        if (!allowedFileTypes.includes(file.mimetype)) {
-            throw new Error('Unsupported file type. Please upload a supported file type.');
-        }
-        const result = await cloudinary.uploader.upload(file.path, options);
-        
-        return result.secure_url; // Return the secure URL of the uploaded file
-    } catch (error) {
-        throw error;
-    }
-};
-
-module.exports = upload;
