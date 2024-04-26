@@ -79,17 +79,17 @@ const generateEmailContentForUpdateOrderStatus = async (order) => {
     const productName = product ? product.name : 'Unknown Product';
 
     return `
-      <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; border: 2px solid #ccc;">
-        <p style="font-size: 16px;">Dear Customer,</p>
-        <p style="font-size: 14px;">We're writing to inform you that the status of your order with ID ${order._id} has been updated.</p>
-        <p style="font-size: 14px;">Order Details:</p>
-        <ul style="font-size: 14px;">
-          <li>Product: ${productName}</li>
-          <li>Quantity: ${order.product.quantity}</li>
-          <li>Status: ${order.status}</li>
-        </ul>
-        <p style="font-size: 14px;">Thank you for choosing us.</p>
-      </div>
+    <div style="font-family: Arial, sans-serif; color: #333; background-color: #f9f9f9; padding: 20px; border: 1px solid #ccc; border-radius: 5px;">
+    <p style="font-size: 16px; margin-bottom: 10px;">Dear Customer,</p>
+    <p style="font-size: 14px; margin-bottom: 15px;">We're writing to inform you that the status of your order with ID <strong>${order._id}</strong> has been updated.</p>
+    <p style="font-size: 14px; margin-bottom: 15px;"><strong>Order Details:</strong></p>
+    <ul style="font-size: 14px; list-style-type: none; padding: 0;">
+      <li><strong>Product:</strong> ${productName}</li>
+      <li><strong>Quantity:</strong> ${order.product.quantity}</li>
+      <li><strong>Status:</strong> ${order.status}</li>
+    </ul>
+    <p style="font-size: 14px; margin-top: 15px;">Thank you for choosing us.</p>
+  </div>
     `;
   } catch (error) {
     return false;
@@ -99,12 +99,12 @@ const generateEmailContentForUpdateOrderStatus = async (order) => {
 const generateEmailContentForOrderAccept = async (order) => {
   try {
     return `
-      <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; border: 2px solid #ccc;">
-        <p style="font-size: 16px;">Dear Customer,</p>
-        <p style="font-size: 14px;">We are pleased to inform you that your order with Printing Press HU has been accepted.</p>
-        <p style="font-size: 14px;">Please review the invoice in your account and proceed with payment at your earliest convenience.</p>
-        <p style="font-size: 14px;">Thank you for choosing our services!</p>
-      </div>
+    <div style="font-family: Arial, sans-serif; color: #333; background-color: #f9f9f9; padding: 20px; border: 1px solid #ccc; border-radius: 5px; margin-top: 20px;">
+    <p style="font-size: 16px; margin-bottom: 10px;">Dear Customer,</p>
+    <p style="font-size: 14px; margin-bottom: 15px;">We are pleased to inform you that your order with Printing Press HU has been accepted.</p>
+    <p style="font-size: 14px; margin-bottom: 15px;">Please review the invoice in your account and proceed with payment at your earliest convenience.</p>
+    <p style="font-size: 14px;">Thank you for choosing our services!</p>
+  </div>
     `;
   } catch (error) {
     return false;
@@ -113,12 +113,12 @@ const generateEmailContentForOrderAccept = async (order) => {
 
 const generateEmailContentForOrderDeny = (order) => {
   return `
-    <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; border: 2px solid #ccc;">
-      <p style="font-size: 16px;">Dear Customer,</p>
-      <p style="font-size: 14px;">We regret to inform you that your order with ID ${order._id} has been denied.</p>
-      <p style="font-size: 14px;">If you have any queries, please don't hesitate to contact us.</p>
-      <p style="font-size: 14px;">Thank you for your understanding.</p>
-    </div>
+  <div style="font-family: Arial, sans-serif; color: #333; background-color: #f9f9f9; padding: 20px; border: 1px solid #ccc; border-radius: 5px; margin-top: 20px;">
+  <p style="font-size: 16px; margin-bottom: 10px;">Dear Customer,</p>
+  <p style="font-size: 14px; margin-bottom: 15px;">We regret to inform you that your order with ID <strong>${order._id}</strong> has been denied.</p>
+  <p style="font-size: 14px; margin-bottom: 15px;">If you have any queries, please don't hesitate to contact us.</p>
+  <p style="font-size: 14px;">Thank you for your understanding.</p>
+</div>
   `;
 };
   
