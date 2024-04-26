@@ -1,16 +1,21 @@
 const Product = require("../models/product");
+const fs = require('fs');
 
 const createProduct = async (req, res, next) => {
   try {
+    
     if (!req.file) {
       return res.status(400).json({ message: "Please upload an image." });
     }
-
+    
     const productData = req.body;
     productData.image = req.file.path;
+    
+    if (!fs.existsSync(productData.image)) {
+      return res.status(404).json({ message: "File not found" });
+    }
 
     const product = new Product(productData);
-
     await product.save();
 
     res.setHeader('Content-Type', 'application/json; charset=utf-8');

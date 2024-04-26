@@ -21,9 +21,6 @@ const createProductValidator = [
     .notEmpty()
     .withMessage("Product description is required."),
 
-    body("image")
-    .optional(),
-  
   body("requiredData")
     .isArray({ min: 1 })
     .withMessage("At least one required data field is required."),
