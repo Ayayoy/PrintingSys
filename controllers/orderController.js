@@ -48,8 +48,7 @@ const getOrderById = async (req, res, next) => {
   try {
     const orderId = req.params.id;
     const order = await OrderModel.findById(orderId)
-      .select('user_id product status adminMessage createdAt updatedAt')
-      .populate('product', 'name')
+      .select('user_id product status adminMessages createdAt updatedAt')
       .exec();
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
@@ -230,7 +229,7 @@ const sendAdminMessage = async (req, res, next) => {
 
     await sendAdminMessageEmail({ to: userEmail, message });
 
-    order.adminMessage = message;
+    order.adminMessages.push(message);
     await order.save();
     
     res.status(200).json({ message: 'Message sent successfully' });
