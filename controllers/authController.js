@@ -137,8 +137,12 @@ const resetPassword = async (req, res, next) => {
 
     const user = await UserModel.findOne({ email });
 
-    if (!user || resetCode !== user.verificationCode) {
-      return res.status(404).json({ message: "Invalid verification code." });
+    if (!user) {
+      return res.status(404).json({ message: "Invalid email." });
+    }
+
+    if (resetCode !== user.verificationCode) {
+      return res.status(400).json({ message: "Invalid verification code." });
     }
 
     user.password = newPassword;
