@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const { getProductName } = require("./dbMethods/orderMethods");
+
 const Schema = mongoose.Schema;
 
 const orderSchema = new Schema({
@@ -8,10 +10,14 @@ const orderSchema = new Schema({
     index: true
   },
   product: {
+  
     product_id: {
       type: Schema.Types.ObjectId,
       ref: 'Product',
       required: [true, "Product ID is required."]
+    },
+    product_name:{
+      type: String
     },
     quantity: {
       type: Number,
@@ -50,6 +56,17 @@ const orderSchema = new Schema({
     ref: 'Invoice' 
   }
 }, { timestamps: true });
+
+orderSchema.pre('save', async function(next) {
+  try {
+    
+    this.product.product_name = await getProductName(this.product.product_id);
+      
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 
 const OrderModel = mongoose.model("Order", orderSchema);
 
