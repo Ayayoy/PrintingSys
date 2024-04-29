@@ -15,8 +15,16 @@ async function setupMiddleware(app) {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
-  app.use(cors());
+  const corsOptions = {
+    origin: 'http://localhost:5173', 
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    allowedHeaders: "Content-Type,Authorization",
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+    credentials: true
+  };
 
+  app.use(cors(corsOptions));
   const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100,

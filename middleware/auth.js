@@ -46,12 +46,12 @@ const authenticated = async (req, res, next) => {
 const isAdmin = async (req, res, next) => {
   try {
     const token = req.headers.authorization;
+
     const decodedToken = await verifyToken(token);
 
     if (!decodedToken || !decodedToken.role || decodedToken.role !== 'admin') {
       return res.status(403).json({ message: 'Forbidden: Admin access required.' });
     }
-
     req.userData = decodedToken;
     next();
   } catch (error) {
