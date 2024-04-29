@@ -16,7 +16,7 @@ async function setupMiddleware(app) {
   app.use(express.urlencoded({ extended: true }));
 
   const corsOptions = {
-    origin: "*",
+    origin:  ['http://localhost:5173', 'https://printing-sys-fojo.vercel.app'],
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     allowedHeaders: "Content-Type,Authorization",
     preflightContinue: false,

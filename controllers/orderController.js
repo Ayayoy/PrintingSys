@@ -7,7 +7,7 @@ const upload = require("../utils/upload");
 
 const getAllOrders = async (req, res, next) => {
   try {
-    const orders = await OrderModel.find({ accepted: false }, '_id user_id product status createdAt updatedAt').exec();
+    const orders = await OrderModel.find({ accepted: false }, '_id user_id product status accepted createdAt updatedAt').exec();
     if (!orders || orders.length === 0) {
       return res.status(404).json({ message: 'No orders found.' });
     }
@@ -19,7 +19,7 @@ const getAllOrders = async (req, res, next) => {
 
 const getAllAcceptedOrders = async (req, res, next) => {
   try {
-    const orders = await OrderModel.find({ accepted: true }, '_id user_id product status createdAt updatedAt').exec();
+    const orders = await OrderModel.find({ accepted: true }, '_id user_id product status accepted createdAt updatedAt').exec();
     if (!orders || orders.length === 0) {
       return res.status(404).json({ message: 'No accepted orders found.' });
     }
@@ -32,7 +32,7 @@ const getAllAcceptedOrders = async (req, res, next) => {
 const getOrderHistory = async (req, res, next) => {
   try {
     const userId = req.params.user_id;
-    const orders = await OrderModel.find({ user_id: userId }, '_id product status createdAt updatedAt').exec();
+    const orders = await OrderModel.find({ user_id: userId }, '_id product status accepted adminMessages createdAt updatedAt').exec();
     
     if (!orders || orders.length === 0) {
       return res.status(404).json({ message: 'No orders found for this user.' });
@@ -48,7 +48,7 @@ const getOrderById = async (req, res, next) => {
   try {
     const orderId = req.params.id;
     const order = await OrderModel.findById(orderId)
-      .select('user_id product status adminMessages createdAt updatedAt')
+      .select('user_id product status accepted adminMessages createdAt updatedAt')
       .exec();
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
@@ -62,14 +62,7 @@ const getOrderById = async (req, res, next) => {
 
 const createOrder = async (req, res, next) => {
   try {
-    const token = req.headers.authorization;
-    const tokenParts = token.split(' ');
-    const jwtToken = tokenParts[1];
-
-    const decodedToken = decodeToken(jwtToken);
-    const user_id = decodedToken.userId;
-
-    const { product: { product_id, quantity, data } } = req.body;
+    const { user_id, product: { product_id, quantity, data } } = req.body;
 
     if (!req.file || !req.file.path) {
       return res.status(400).json({ error: 'File is required' });
@@ -79,6 +72,9 @@ const createOrder = async (req, res, next) => {
       folder: `${process.env.APP_NAME}/orders`,
       resource_type: "auto"
     });
+    if (!fileUrl){
+      return res.status(400).json({ error: 'Error uploading file' });
+    }
 
     const product = { product_id, quantity, file: fileUrl, data };
 
@@ -86,6 +82,7 @@ const createOrder = async (req, res, next) => {
 
     res.status(201).json({ message: 'Order created successfully' });
   } catch (error) {
+    console.error("Error creating order:", error);
     next(error);
   }
 };

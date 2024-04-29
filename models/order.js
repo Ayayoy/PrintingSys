@@ -40,8 +40,9 @@ const orderSchema = new Schema({
     }]
   },
   status: {
-    type: String,
-    default: 'pending'
+    type: Number,
+    enum: [0, 1, 2, 3],
+    default: 0
   },
   accepted: {
     type: Boolean,
