@@ -133,6 +133,11 @@ const deleteOrder = async (req, res, next) => {
   try {
     const orderId = req.params.id;
     const deletedOrder = await OrderModel.findByIdAndDelete(orderId).exec();
+
+    // if (deletedOrder.acceptted == true){
+      
+    //   // add response giving error message that the order cant deleted because it is accepted by admin
+    // }
     if (!deletedOrder) {
       return res.status(404).json({ error: 'Order not found' });
     }

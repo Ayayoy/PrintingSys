@@ -12,6 +12,16 @@ async function setupMiddleware(app) {
     app.use(morgan("dev"));
   }
 
+  app.use((req, res, next) => {
+    const start = Date.now();
+    res.on("finish", () => {
+      const end = Date.now();
+      const duration = end - start;
+      console.log(`Request ${req.method} ${req.originalUrl} took ${duration}ms`);
+    });
+    next();
+  });
+
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 

@@ -10,12 +10,12 @@ const verifyToken = async (token) => {
       throw new Error("No token provided.");
     }
 
-    const tokenParts = token.split(" ");
-    if (tokenParts.length !== 2 || tokenParts[0] !== "Bearer") {
-      throw new Error("Invalid token format.");
-    }
+    // const tokenParts = token.split(" ");
+    // if (tokenParts.length !== 2 || tokenParts[0] !== "Bearer") {
+    //   throw new Error("Invalid token format.");
+    // }
 
-    const jwtToken = tokenParts[1];
+    // const jwtToken = tokenParts[1];
 
     if (revokedTokens.has(jwtToken)) {
       throw new Error("Token revoked.");
