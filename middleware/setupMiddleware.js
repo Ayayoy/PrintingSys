@@ -2,7 +2,6 @@
 const express = require("express");
 const rateLimit = require("express-rate-limit");
 const morgan = require("morgan");
-const cors = require("cors");
 const dotenv = require("dotenv");
 
 dotenv.config({ path: "config/config.env" });
@@ -14,17 +13,6 @@ async function setupMiddleware(app) {
 
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
-
-  const corsOptions = {
-    origin:  ['http://localhost:5173', 'https://printing-sys-fojo.vercel.app'],
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    allowedHeaders: "Content-Type,Authorization",
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
-    credentials: true
-  };
-
-  app.use(cors(corsOptions));
 
   const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
