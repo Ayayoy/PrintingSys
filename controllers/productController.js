@@ -21,6 +21,18 @@ const createProduct = async (req, res, next) => {
 
 const getAllProducts = async (req, res, next) => {
   try {
+    const products = await Product.find({}, '_id name description image deleted');
+    if (!products.length) {
+      return res.status(200).json({ message: "No Products found" });
+    }
+    res.status(200).json({ message: "Products fetched successfully", data: products });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getShownProducts = async (req, res, next) => {
+  try {
     const products = await Product.find({ deleted: false }, '_id name description image');
     if (!products.length) {
       return res.status(200).json({ message: "No Products found" });
@@ -88,27 +100,27 @@ const toggleProductDeletedStatus = async (productId, deletedStatus) => {
   return updatedProduct;
 };
 
-const deleteProduct = async (req, res, next) => {
+const hideProduct = async (req, res, next) => {
   try {
     const productId = req.params.id;
     await toggleProductDeletedStatus(productId, true);
-    res.status(200).json({ message: "Product deleted successfully" });
+    res.status(200).json({ message: "Product hidden successfully" });
   } catch (error) {
     next(error);
   }
 };
 
-const restoreProduct = async (req, res, next) => {
+const showProduct = async (req, res, next) => {
   try {
     const productId = req.params.id;
     await toggleProductDeletedStatus(productId, false);
-    res.status(200).json({ message: "Product restored successfully" });
+    res.status(200).json({ message: "Product shown successfully" });
   } catch (error) {
     next(error);
   }
 };
 
-const finallyDeleteProduct = async (req, res, next) => {
+const deleteProduct = async (req, res, next) => {
   try {
     const productId = req.params.id;
 
@@ -150,11 +162,12 @@ const searchProducts = async (req, res, next) => {
 module.exports = {
   createProduct,
   getAllProducts,
+  getShownProducts,
   getDeletedProducts,
   getProductById,
   updateProduct,
+  hideProduct,
+  showProduct,
   deleteProduct,
-  restoreProduct,
-  finallyDeleteProduct,
   searchProducts,
 };

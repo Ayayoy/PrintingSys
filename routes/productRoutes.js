@@ -9,13 +9,14 @@ const upload = require('../utils/fileUpload');
 const { createProductValidator, updateProductValidator } = require("../utils/validators/productValidator");
 
 router.post('/create', isAdmin, upload.product.single('image'), createProductValidator, productController.createProduct);
-router.get('/', paginateMiddleware(ProductModel), productController.getAllProducts);
-router.get('/deletedProducts', isAdmin, paginateMiddleware(ProductModel), productController.getDeletedProducts);
+router.get('/getAllProducts', isAdmin, paginateMiddleware(ProductModel), productController.getAllProducts);
+router.get('/getShownProducts', paginateMiddleware(ProductModel), productController.getShownProducts);
+// router.get('/deletedProducts', isAdmin, paginateMiddleware(ProductModel), productController.getDeletedProducts);
 router.get('/:id', productController.getProductById);
 router.put('/:id', isAdmin, upload.product.single('image'), updateProductValidator, productController.updateProduct);
-router.put('/delete/:id', isAdmin, productController.deleteProduct);
-router.put('/restore/:id', isAdmin, productController.restoreProduct);
-router.delete('/:id', isAdmin, productController.finallyDeleteProduct);
+router.put('/hide/:id', isAdmin, productController.hideProduct);
+router.put('/show/:id', isAdmin, productController.showProduct);
+router.delete('/:id', isAdmin, productController.deleteProduct);
 router.get('/search/:query', productController.searchProducts);
 
 module.exports = router;
