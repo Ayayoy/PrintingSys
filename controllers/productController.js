@@ -108,6 +108,25 @@ const restoreProduct = async (req, res, next) => {
   }
 };
 
+const finallyDeleteProduct = async (req, res, next) => {
+  try {
+    const productId = req.params.id;
+
+    // Find the product by ID and delete it
+    const deletedProduct = await Product.findByIdAndDelete(productId);
+
+    // If the product doesn't exist, return 404 Not Found
+    if (!deletedProduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Return a success message
+    res.status(200).json({ message: "Product deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const searchProducts = async (req, res, next) => {
   try {
     const query = req.params.query;
@@ -136,5 +155,6 @@ module.exports = {
   updateProduct,
   deleteProduct,
   restoreProduct,
+  finallyDeleteProduct,
   searchProducts,
 };

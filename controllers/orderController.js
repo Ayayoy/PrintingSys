@@ -49,8 +49,13 @@ const getOrderById = async (req, res, next) => {
   try {
     const orderId = req.params.id;
     const order = await OrderModel.findById(orderId)
+      .populate({
+        path: 'user_id',
+        select: 'username email phoneNumber'
+      })
       .select('user_id product status accepted adminMessages createdAt updatedAt')
       .exec();
+
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
     }
@@ -60,6 +65,7 @@ const getOrderById = async (req, res, next) => {
     next(error);
   }
 };
+
 
 const createOrder = async (req, res, next) => {
   try {
