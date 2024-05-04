@@ -21,9 +21,9 @@ const validateProductData = async (productId, field_name, value) => {
     if (!field.required && !value) {
       return true;
     }
-    if (field.hasChoices && !field.choices.includes(value)) {
-      throw new Error(`Value "${value}" for field "${field_name}" is not from the provided choices`);
-    }
+    // if (field.hasChoices && !field.choices.includes(value)) {
+    //   throw new Error(`Value "${value}" for field "${field_name}" is not from the provided choices`);
+    // }
     if (field.required && !value) {
       throw new Error(`Value for field "${field_name}" is required.`);
     }

@@ -111,7 +111,7 @@ const restoreProduct = async (req, res, next) => {
 const searchProducts = async (req, res, next) => {
   try {
     const query = req.params.query;
-    const regexQuery = new RegExp(`\\b${query}`, 'i'); // 'i' makes the search case-insensitive
+    const regexQuery = new RegExp(`\\b${query}`, 'i');
     const products = await Product.find({
       $or: [
         { name: { $regex: regexQuery } },
@@ -127,7 +127,6 @@ const searchProducts = async (req, res, next) => {
     next(error);
   }
 };
-
 
 module.exports = {
   createProduct,

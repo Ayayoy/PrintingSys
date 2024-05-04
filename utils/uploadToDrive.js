@@ -19,26 +19,18 @@ async function authorize() {
 }
 
 async function uploadFile(filePath, fileName) {
-    console.log("Starting file upload...");
     try {
-        // Detecting authClient
-        const authClient = await authorize(); // Assuming authorize function is accessible within the scope
-
-        // Detecting folderId
-        const folderId = '1lY_PeSwah9Ssl8_zq0HaNBX18vQfQ7su'; // Or you can detect it from somewhere else
-
-        // Detecting mimeType
-        const mimeType = detectMimeType(filePath); // Function to detect MIME type based on file extension
-
+        const authClient = await authorize();
+        const folderId = '1lY_PeSwah9Ssl8_zq0HaNBX18vQfQ7su';
+        const mimeType = detectMimeType(filePath); 
         const drive = google.drive({ version: 'v3', auth: authClient });
 
         const fileMetaData = {
             name: fileName,
             parents: [folderId],
-            mimeType: mimeType // Assuming mimeType is always detected
+            mimeType: mimeType
         };
 
-        console.log("Uploading file metadata...");
         const response = await drive.files.create({
             resource: fileMetaData,
             media: {
@@ -48,7 +40,6 @@ async function uploadFile(filePath, fileName) {
             fields: 'id'
         });
 
-        console.log("File upload successful. File ID:", response.data.id);
         return response.data;
     } catch (error) {
         console.error("Error uploading file:", error);

@@ -3,9 +3,8 @@ const OrderModel = require("../models/order");
 const { generateInvoice } = require('./invoiceController');
 const { sendEmailForOrderAccept, sendEmailForOrderDeny, sendEmailForOrderUpdateOrderStatus, sendAdminMessageEmail, getUserEmailById } = require("../utils/email");
 const { decodeToken } = require('../utils/token');
-const uploadToDrive = require('../utils/uploadToDrive'); // Import the uploadFileToDrive function
+const uploadToDrive = require('../utils/uploadToDrive');
 const path = require('path');
-
 
 const getAllOrders = async (req, res, next) => {
   try {
@@ -70,25 +69,17 @@ const createOrder = async (req, res, next) => {
       return res.status(400).json({ error: 'File is required' });
     }
 
-    // Upload file to Google Drive
     const filePath = req.file.path;
     const fileName = req.file.filename;
 
     const driveFile = await uploadToDrive.uploadFile(filePath, fileName);
 
-    // Get the file ID and construct the link
     const driveFileId = driveFile.id;
     const fileLink = `https://drive.google.com/uc?id=${driveFileId}`;
 
-    const product = { product_id, quantity, file: fileLink, data }; // Include the file link
+    const product = { product_id, quantity, file: fileLink, data };
 
-    console.log("Creating new order in the database...");
-    console.log("Product:", product);
-
-    // Save the order to the database
     const newOrder = await OrderModel.create({ user_id, product });
-
-    console.log("Order created successfully:", newOrder);
 
     res.status(201).json({ message: 'Order created successfully' });
   } catch (error) {
