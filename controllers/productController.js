@@ -23,7 +23,7 @@ const getAllProducts = async (req, res, next) => {
   try {
     const products = await Product.find({ deleted: false }, '_id name description image');
     if (!products.length) {
-      return res.status(404).json({ message: "No Products found" });
+      return res.status(200).json({ message: "No Products found" });
     }
     res.status(200).json({ message: "Products fetched successfully", data: products });
   } catch (error) {
@@ -35,7 +35,7 @@ const getDeletedProducts = async (req, res, next) => {
   try {
     const deletedProducts = await Product.find({ deleted: true }, '_id name description image');
     if (!deletedProducts.length) {
-      return res.status(404).json({ message: "No Deleted Products found" });
+      return res.status(200).json({ message: "No Deleted Products found" });
     }
     res.status(200).json({ message: "Deleted Products fetched successfully", data: deletedProducts });
   } catch (error) {
@@ -111,15 +111,23 @@ const restoreProduct = async (req, res, next) => {
 const searchProducts = async (req, res, next) => {
   try {
     const query = req.params.query;
-    const products = await Product.find({ $text: { $search: query } }, 'name description image');
+    const regexQuery = new RegExp(`\\b${query}`, 'i'); // 'i' makes the search case-insensitive
+    const products = await Product.find({
+      $or: [
+        { name: { $regex: regexQuery } },
+      ]
+    }, 'name description image');
+
     if (!products.length) {
       return res.status(404).json({ message: 'No products found for the given query.' });
     }
+
     res.status(200).json({ message: "Products fetched successfully", data: products });
   } catch (error) {
     next(error);
   }
 };
+
 
 module.exports = {
   createProduct,

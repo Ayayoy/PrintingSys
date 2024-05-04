@@ -3,13 +3,15 @@ const OrderModel = require("../models/order");
 const { generateInvoice } = require('./invoiceController');
 const { sendEmailForOrderAccept, sendEmailForOrderDeny, sendEmailForOrderUpdateOrderStatus, sendAdminMessageEmail, getUserEmailById } = require("../utils/email");
 const { decodeToken } = require('../utils/token');
-const upload = require("../utils/upload");
+const uploadToDrive = require('../utils/uploadToDrive'); // Import the uploadFileToDrive function
+const path = require('path');
+
 
 const getAllOrders = async (req, res, next) => {
   try {
     const orders = await OrderModel.find({ accepted: false }, '_id user_id product status accepted createdAt updatedAt').exec();
     if (!orders || orders.length === 0) {
-      return res.status(404).json({ message: 'No orders found.' });
+      return res.status(200).json({ message: 'No orders found.' });
     }
     res.status(200).json({ message: 'Orders fetched successfully', data: orders });
   } catch (error) {
@@ -21,7 +23,7 @@ const getAllAcceptedOrders = async (req, res, next) => {
   try {
     const orders = await OrderModel.find({ accepted: true }, '_id user_id product status accepted createdAt updatedAt').exec();
     if (!orders || orders.length === 0) {
-      return res.status(404).json({ message: 'No accepted orders found.' });
+      return res.status(200).json({ message: 'No accepted orders found.' });
     }
     res.status(200).json({ message: 'Accepted orders fetched successfully', data: orders });
   } catch (error) {
@@ -35,7 +37,7 @@ const getOrderHistory = async (req, res, next) => {
     const orders = await OrderModel.find({ user_id: userId }, '_id product status accepted adminMessages createdAt updatedAt').exec();
     
     if (!orders || orders.length === 0) {
-      return res.status(404).json({ message: 'No orders found for this user.' });
+      return res.status(200).json({ message: 'No orders found for this user.' });
     }
     
     res.status(200).json({ message: 'Order history fetched successfully', data: orders });
@@ -68,17 +70,25 @@ const createOrder = async (req, res, next) => {
       return res.status(400).json({ error: 'File is required' });
     }
 
-    const fileUrl = await upload(req.file, {
-      folder: `${process.env.APP_NAME}/orders`,
-      resource_type: "auto"
-    });
-    if (!fileUrl){
-      return res.status(400).json({ error: 'Error uploading file' });
-    }
+    // Upload file to Google Drive
+    const filePath = req.file.path;
+    const fileName = req.file.filename;
 
-    const product = { product_id, quantity, file: fileUrl, data };
+    const driveFile = await uploadToDrive.uploadFile(filePath, fileName);
 
+    // Get the file ID and construct the link
+    const driveFileId = driveFile.id;
+    const fileLink = `https://drive.google.com/uc?id=${driveFileId}`;
+
+    const product = { product_id, quantity, file: fileLink, data }; // Include the file link
+
+    console.log("Creating new order in the database...");
+    console.log("Product:", product);
+
+    // Save the order to the database
     const newOrder = await OrderModel.create({ user_id, product });
+
+    console.log("Order created successfully:", newOrder);
 
     res.status(201).json({ message: 'Order created successfully' });
   } catch (error) {
@@ -95,17 +105,23 @@ const updateOrder = async (req, res, next) => {
     const order = await OrderModel.findById(orderId);
 
     if (req.file && req.file.path) {
-      const uploadedFile = await upload(req.file, { folder: `${process.env.APP_NAME}/orders` });
-      order.product.file = uploadedFile;
+      // Upload file to Google Drive
+      const filePath = req.file.path;
+      const fileName = req.file.filename;
+
+      const driveFile = await uploadToDrive.uploadFile(filePath, fileName);
+
+      // Get the file ID and construct the link
+      const driveFileId = driveFile.id;
+      const fileLink = `https://drive.google.com/uc?id=${driveFileId}`;
+
+      // Save file link to the database
+      order.product.file = fileLink;
     }
 
     if (updateData) {
       if (updateData.quantity) {
         order.product.quantity = updateData.quantity;
-      }
-
-      if (updateData.file) {
-        order.product.file = updateData.file;
       }
 
       if (updateData.data) {

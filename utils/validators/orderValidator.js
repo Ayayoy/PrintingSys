@@ -50,7 +50,6 @@ const createOrderValidator = [
 
 const updateOrderValidator = [
   body('product.quantity').optional().isInt({ min: 1 }).withMessage('Quantity must be at least 1.'),
-  body('product.File').optional().notEmpty().withMessage('File is required.'),
   validatorMiddleware
 ];
 

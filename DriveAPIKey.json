@@ -1,0 +1,14 @@
+{
+  "_comment": "DriveAPIKey.json",
+  "type": "service_account",
+  "project_id": "printing-press-422200",
+  "private_key_id": "54d3487340dd067fdec4936b99bae9ec34afae77",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDbpZuWPtGphat1\nBpeHi/L0I2ZOAKPt+SxoXIHWjd0ApwEx/vm99vDR1fcJiwR9gfxx7iqC0eQZ6JL+\nX3PI45HSvY4i7Ky6Tibrs24T1y9VeofK4qah4ISY59WS++8XkETtKUtOTrjSaen4\nOySfe/jaSGHQv5F8cdrgXsmy3fOvygQqoTV5y+NzxmvIHODDxUUgNeBDP7DiMx0S\nrdZhBB3kKes7RkFdST70Rxq+1b3zZ9Dxllj1Z8qorku61qyLPtleDekO2BctwbVf\nB5enfUw1fNvLiUhCXp7yCMybX1JMhRdKlT/T6o2a64Yfc5EY7xZSVzYqAfemaGQ8\nrP6SDXJzAgMBAAECggEADXKnwnypIIxvEXSsXV+rqdfrARaX8s+BMQiM6IJ6B/qx\nn4qBZuiSGP7VJ6/rv/Vv69fNoYHRSebL7SgR8jhAqtrxM2EzOBrl1iN/t1ZC7yRX\n4QuccSfKZoQ3Ns8W9eXe2nhfRHWcakGS0iBo3xzbgR3SY1H/SdO8t2UGS128eEQ0\nkJyXb+Xgj7fBA47916/Zl/Qstlyk22WxmMShjBeQS6g6SYAgMnIjSsXtb1fEQ/qf\n41th30D78JXsZki7rXCWRjAQu9jcCeVjJNRguXT2uq5nJkvb1nEpjicWaLHiiuK7\nCSjlxbPnsRGtr2Fc6yadrqfVBx9G8d+TJqpSVCNeZQKBgQDuRoRPBR+myob2X/Ok\nUgprcj92qUPou0y04Dj60NamawR8GhLuIIdI/mpHFn6K3HMbIdiqtvSIHtb1jzEZ\nGcox4nVqCXB97Fd6nBD/zy6s8ywyk6n8llz04PHwo1Zigdr9ojIJUK5soFqBkNnh\n0UWPIz2JPnstYpMU+wwxMuWVjwKBgQDr/FjepA5+FSWCRlCC/xFgwgrp7yJ2hDSI\nAQ9tLIOSo2F5Wuno8OCaD7AW2rLHSGiMeEjxWn/xooJCaTS3EJbmyZH+V0FDAz74\nXPoAxo78LObLb0ArFR43HB4g61oLRcAVpTOnZsS7kcAWIV7fk3yv1u1KWdmpr2Zb\n13c0YWBK3QKBgAzik1USmduTKCk6lxpTtWyKCRSJorp7JnLBjVNC59ioAN4VKuDl\nsWspFuYxOTaZJUBaXDUfH6ocwNMWozkQQ/beoCrTx9mHZlOjDOhIc+W2YLV7dr3K\nA8zaPTseGhXJn+YHV11Zl5UYNsy64I1tm61Z4oIBdvfFVN7VlJs0fWXRAoGAI/yF\naN5Hv35mC+nBGVjgQ4sTsvzemogqoprWyWVCYzg7AxCUHwuslJHT3ohXPwCRwOoO\n5Y9Rd326s3nrqgcDnAodE1YnA5sZHTLAhSHCaD5Iq7k5ZdiAlRLanVaGkrV+R068\nA8kuMxRU4IsSNrH9D6uM4Au3n6K5z0OaUAiRcJkCgYA3j5CVmk8LAxUidGU3DsEZ\nJMRtJ4Rax+FhTvlWxJWypPxIA8jYzqqq8OljU0g4Vo0ltpRabLNHF5Y46rzqpcrA\nQSAJw/mQLpRRoPXLAT3u0suTUK4IXyY0bblBdG7SAvcm9PH6lbnfv9cowyRBqzQZ\n6/KphliK6IOl6QfV9Aw0+Q==\n-----END PRIVATE KEY-----\n",
+  "client_email": "printingpress@printing-press-422200.iam.gserviceaccount.com",
+  "client_id": "109207522607637203881",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/printingpress%40printing-press-422200.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

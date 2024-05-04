@@ -15,6 +15,6 @@ router.get('/:id', productController.getProductById);
 router.put('/:id', isAdmin, upload.product.single('image'), updateProductValidator, productController.updateProduct);
 router.put('/delete/:id', isAdmin, productController.deleteProduct);
 router.put('/restore/:id', isAdmin, productController.restoreProduct);
-router.get('/search/:query', paginateMiddleware(ProductModel), productController.searchProducts);
+router.get('/search/:query', productController.searchProducts);
 
 module.exports = router;
