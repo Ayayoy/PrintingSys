@@ -49,8 +49,7 @@ async function uploadFile(filePath, fileName) {
 
 function detectMimeType(filePath) {
     const extension = path.extname(filePath).toLowerCase();
-    // Get MIME type based on file extension
-    const mimeType = mime.lookup(extension) || 'application/octet-stream'; // Default to application/octet-stream if MIME type is not found
+    const mimeType = mime.lookup(extension) || 'application/octet-stream';
     return mimeType;
 }
 

@@ -1,6 +1,6 @@
 //controllers/productController
 const Product = require("../models/product");
-const upload = require("../utils/upload");
+const upload = require("../utils/uploadToCloudinary");
 
 const createProduct = async (req, res, next) => {
   try {

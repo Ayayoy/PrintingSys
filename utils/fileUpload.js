@@ -1,14 +1,12 @@
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs').promises; // Use fs promises for asynchronous file operations
+const fs = require('fs').promises;
 
-// Define upload paths
 const uploadPaths = {
   product: path.join('uploads/products/'),
   order: path.join('uploads/orders/')
 };
 
-// Ensure directories exist or create them asynchronously
 const ensureDirectoryExistence = async (filePath) => {
   try {
     const dirname = path.dirname(filePath);
@@ -18,13 +16,11 @@ const ensureDirectoryExistence = async (filePath) => {
   }
 };
 
-// Generate unique filename with original filename and timestamp
 const generateUniqueFilename = (file) => {
   const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
   return uniqueSuffix + '-' + file.originalname;
 };
 
-// Define multer storage for products and orders
 const storage = {
   product: multer.diskStorage({
     destination: async function (req, file, cb) {
@@ -46,11 +42,9 @@ const storage = {
   })
 };
 
-// Define file filters for products and orders
 const fileFilters = {
   product: (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-    if (allowedTypes.includes(file.mimetype)) {
+    if (file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {
       const error = new Error('Invalid file type for product.');
@@ -70,7 +64,6 @@ const fileFilters = {
   }
 };
 
-// Initialize multer instances for products and orders
 const upload = {
   product: multer({
     storage: storage.product,

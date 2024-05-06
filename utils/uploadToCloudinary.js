@@ -5,7 +5,7 @@ const upload = async (file, options = {}) => {
 
         const result = await cloudinary.uploader.upload(file.path, options);
         
-        return result.secure_url; // Return the secure URL of the uploaded file
+        return result.secure_url;
     } catch (error) {
         throw error;
     }

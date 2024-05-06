@@ -130,7 +130,6 @@ const verifyResetCode = async (req, res, next) => {
   }
 };
 
-
 const resetPassword = async (req, res, next) => {
   try {
     const { email, resetCode, newPassword } = req.body;
