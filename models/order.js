@@ -41,7 +41,7 @@ const orderSchema = new Schema({
   },
   status: {
     type: Number,
-    enum: [-1, 0, 1, 2, 3],
+    // enum: [-1, 0, 1, 2, 3],
     default: -1
   },
   accepted: {
