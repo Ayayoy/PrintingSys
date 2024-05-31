@@ -28,6 +28,10 @@ const orderSchema = new Schema({
       type: String,
       //  required: [true, "File is required."]
     },
+    notes: {
+      type: String,
+      default: ''
+    },
     data: [{
       field_name: {
         type: String,

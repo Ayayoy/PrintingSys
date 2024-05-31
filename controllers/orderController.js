@@ -66,10 +66,9 @@ const getOrderById = async (req, res, next) => {
   }
 };
 
-
 const createOrder = async (req, res, next) => {
   try {
-    const { user_id, product: { product_id, quantity, data } } = req.body;
+    const { user_id, product: { product_id, quantity, notes, data } } = req.body;
 
     if (!req.file || !req.file.path) {
       return res.status(400).json({ error: 'File is required' });
@@ -83,7 +82,7 @@ const createOrder = async (req, res, next) => {
     const driveFileId = driveFile.id;
     const fileLink = `https://drive.google.com/uc?id=${driveFileId}`;
 
-    const product = { product_id, quantity, file: fileLink, data };
+    const product = { product_id, quantity, file: fileLink, notes, data };
 
     const newOrder = await OrderModel.create({ user_id, product });
 
@@ -101,24 +100,29 @@ const updateOrder = async (req, res, next) => {
 
     const order = await OrderModel.findById(orderId);
 
+    if (order.accepted) {
+      return res.status(403).json({ error: 'Order cannot be updated because it is accepted.' });
+    }
+
     if (req.file && req.file.path) {
-      // Upload file to Google Drive
       const filePath = req.file.path;
       const fileName = req.file.filename;
 
       const driveFile = await uploadToDrive.uploadFile(filePath, fileName);
 
-      // Get the file ID and construct the link
       const driveFileId = driveFile.id;
       const fileLink = `https://drive.google.com/uc?id=${driveFileId}`;
 
-      // Save file link to the database
       order.product.file = fileLink;
     }
 
     if (updateData) {
       if (updateData.quantity) {
         order.product.quantity = updateData.quantity;
+      }
+
+      if (updateData.notes) {
+        order.product.notes = updateData.notes;
       }
 
       if (updateData.data) {
@@ -142,15 +146,18 @@ const updateOrder = async (req, res, next) => {
 const deleteOrder = async (req, res, next) => {
   try {
     const orderId = req.params.id;
+    const order = await OrderModel.findById(orderId);
+
+    if (order.accepted) {
+      return res.status(403).json({ error: 'Order cannot be deleted because it is accepted.' });
+    }
+
     const deletedOrder = await OrderModel.findByIdAndDelete(orderId).exec();
 
-    // if (deletedOrder.acceptted == true){
-      
-    //   // add response giving error message that the order cant deleted because it is accepted by admin
-    // }
     if (!deletedOrder) {
       return res.status(404).json({ error: 'Order not found' });
     }
+
     return res.status(200).json({ message: 'Order deleted successfully' });
   } catch (error) {
     next(error);
@@ -160,7 +167,7 @@ const deleteOrder = async (req, res, next) => {
 const acceptOrder = async (req, res, next) => {
   try {
     const orderId = req.params.id;
-    const { totalCost, paymentCode } = req.body;
+    const { totalCost, paymentCode, deliveryTime } = req.body;
     
     const order = await OrderModel.findById(orderId).exec();
     if (!order) {
@@ -175,7 +182,7 @@ const acceptOrder = async (req, res, next) => {
         
     await order.save();
 
-    await generateInvoice(orderId, totalCost, paymentCode);
+    await generateInvoice(orderId, totalCost, paymentCode, deliveryTime);
 
     const userEmail = await getUserEmailById(order.user_id);
     await sendEmailForOrderAccept({ ...order.toObject(), user_email: userEmail });

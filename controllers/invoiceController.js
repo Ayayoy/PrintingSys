@@ -1,12 +1,13 @@
 //controllers/invoiceController
 const Invoice = require('../models/invoice');
 
-const generateInvoice = async (orderId, totalCost, paymentCode, next) => { 
+const generateInvoice = async (orderId, totalCost, paymentCode, deliveryTime, next) => { 
   try {
     const invoice = new Invoice({
       order: orderId,
       totalCost, 
-      paymentCode
+      paymentCode,
+      deliveryTime
     });
 
     await invoice.save();
