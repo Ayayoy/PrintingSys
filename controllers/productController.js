@@ -9,11 +9,13 @@ const createProduct = async (req, res, next) => {
       return res.status(400).json({ message: "Product image is required." });
     }
 
-    const imageUrl = await upload(file, { folder: `${process.env.APP_Name}/products` });
+    const imageUrl = await upload(file, {
+      folder: `${process.env.APP_Name}/products`,
+    });
 
     await Product.create({ ...req.body, image: imageUrl });
 
-    res.status(201).json({ message: "Product created successfully"});
+    res.status(201).json({ message: "Product created successfully" });
   } catch (error) {
     next(error);
   }
@@ -21,11 +23,16 @@ const createProduct = async (req, res, next) => {
 
 const getAllProducts = async (req, res, next) => {
   try {
-    const products = await Product.find({}, '_id name description image deleted');
+    const products = await Product.find(
+      {},
+      "_id name description image deleted"
+    );
     if (!products.length) {
       return res.status(200).json({ message: "No Products found" });
     }
-    res.status(200).json({ message: "Products fetched successfully", data: products });
+    res
+      .status(200)
+      .json({ message: "Products fetched successfully", data: products });
   } catch (error) {
     next(error);
   }
@@ -33,11 +40,16 @@ const getAllProducts = async (req, res, next) => {
 
 const getShownProducts = async (req, res, next) => {
   try {
-    const products = await Product.find({ deleted: false }, '_id name description image');
+    const products = await Product.find(
+      { deleted: false },
+      "_id name description image"
+    );
     if (!products.length) {
       return res.status(200).json({ message: "No Products found" });
     }
-    res.status(200).json({ message: "Products fetched successfully", data: products });
+    res
+      .status(200)
+      .json({ message: "Products fetched successfully", data: products });
   } catch (error) {
     next(error);
   }
@@ -45,11 +57,19 @@ const getShownProducts = async (req, res, next) => {
 
 const getDeletedProducts = async (req, res, next) => {
   try {
-    const deletedProducts = await Product.find({ deleted: true }, '_id name description image');
+    const deletedProducts = await Product.find(
+      { deleted: true },
+      "_id name description image"
+    );
     if (!deletedProducts.length) {
       return res.status(200).json({ message: "No Deleted Products found" });
     }
-    res.status(200).json({ message: "Deleted Products fetched successfully", data: deletedProducts });
+    res
+      .status(200)
+      .json({
+        message: "Deleted Products fetched successfully",
+        data: deletedProducts,
+      });
   } catch (error) {
     next(error);
   }
@@ -62,7 +82,9 @@ const getProductById = async (req, res, next) => {
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
-    res.status(200).json({ message: "Product fetched successfully", data: product });
+    res
+      .status(200)
+      .json({ message: "Product fetched successfully", data: product });
   } catch (error) {
     next(error);
   }
@@ -74,11 +96,17 @@ const updateProduct = async (req, res, next) => {
     const productData = req.body;
 
     if (req.file && req.file.path) {
-      const imageUrl = await upload(req.file, { folder: `${process.env.APP_Name}/products` });
+      const imageUrl = await upload(req.file, {
+        folder: `${process.env.APP_Name}/products`,
+      });
       productData.image = imageUrl;
     }
 
-    const updatedProduct = await Product.findByIdAndUpdate(productId, productData, { new: true });
+    const updatedProduct = await Product.findByIdAndUpdate(
+      productId,
+      productData,
+      { new: true }
+    );
 
     if (!updatedProduct) {
       return res.status(404).json({ message: "Product not found" });
@@ -91,7 +119,11 @@ const updateProduct = async (req, res, next) => {
 };
 
 const toggleProductDeletedStatus = async (productId, deletedStatus) => {
-  const updatedProduct = await Product.findByIdAndUpdate(productId, { deleted: deletedStatus }, { new: true });
+  const updatedProduct = await Product.findByIdAndUpdate(
+    productId,
+    { deleted: deletedStatus },
+    { new: true }
+  );
 
   if (!updatedProduct) {
     throw new Error("Product not found");
@@ -142,18 +174,23 @@ const deleteProduct = async (req, res, next) => {
 const searchProducts = async (req, res, next) => {
   try {
     const query = req.params.query;
-    const regexQuery = new RegExp(`\\b${query}`, 'i');
-    const products = await Product.find({
-      $or: [
-        { name: { $regex: regexQuery } },
-      ]
-    }, 'name description image');
+    const regexQuery = new RegExp(`\\b${query}`, "i");
+    const products = await Product.find(
+      {
+        $or: [{ name: { $regex: regexQuery } }],
+      },
+      "name description image"
+    );
 
     if (!products.length) {
-      return res.status(404).json({ message: 'No products found for the given query.' });
+      return res
+        .status(404)
+        .json({ message: "No products found for the given query." });
     }
 
-    res.status(200).json({ message: "Products fetched successfully", data: products });
+    res
+      .status(200)
+      .json({ message: "Products fetched successfully", data: products });
   } catch (error) {
     next(error);
   }
