@@ -43,7 +43,6 @@ io.on('connection', (socket) => {
   });
 
   socket.on('message', async (message) => {
-    console.log('Message received:', message);
 
     try {
       const chatMessage = new Chat({
