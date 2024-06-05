@@ -8,7 +8,10 @@ const searchUser = async (req, res, next) => {
     const regexQuery = new RegExp(`\\b${query}`, "i");
     const users = await UserModel.find(
       {
-        $or: [{ email: { $regex: regexQuery } }],
+        $and: [
+          { role: "user" },
+          { $or: [{ email: { $regex: regexQuery } }, { username: { $regex: regexQuery } }] }
+        ]
       },
       "username email"
     );
