@@ -9,7 +9,7 @@ const {
 const router = express.Router();
 
 router.get("/searchUser/:query", searchUser);
-router.get("/getChatByReceiverOrSenderID", getChatByReceiverOrSenderID);
+router.post("/getChatByReceiverOrSenderID", getChatByReceiverOrSenderID);
 router.post("/user/sendMessageToAdmins", userSendMessageToAdmins);
 router.get("/getUniqueChatUsers/:userId", getUniqueChatUsers);
 

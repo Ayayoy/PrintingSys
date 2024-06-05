@@ -1,5 +1,6 @@
 //controllers/OrderController
 const OrderModel = require("../models/order");
+const Notification = require("../models/notification");
 const { generateInvoice } = require('./invoiceController');
 const { sendEmailForOrderAccept, sendEmailForOrderDeny, sendEmailForOrderUpdateOrderStatus, sendAdminMessageEmail, getUserEmailById } = require("../utils/email");
 const { decodeToken } = require('../utils/token');
@@ -164,6 +165,26 @@ const deleteOrder = async (req, res, next) => {
   }
 };
 
+let users = {};
+
+const createNotification = async (userId, title, message) => {
+  try {
+    const notification = new Notification({
+      user_id: userId,
+      title,
+      message
+    });
+    await notification.save();
+
+    const userSocketId = users[userId];
+    if (userSocketId) {
+      io.to(userSocketId).emit('notification', { title, message });
+    }
+  } catch (error) {
+    console.error('Error creating notification:', error);
+  }
+};
+
 const acceptOrder = async (req, res, next) => {
   try {
     const orderId = req.params.id;
@@ -174,18 +195,19 @@ const acceptOrder = async (req, res, next) => {
       return res.status(404).json({ error: 'Order not found' });
     }
     
-    if (!totalCost ) {
+    if (!totalCost) {
       return res.status(400).json({ error: 'Total cost is required' });
     }
     
     order.accepted = true;
-        
     await order.save();
 
     await generateInvoice(orderId, totalCost, paymentCode, deliveryTime);
 
     const userEmail = await getUserEmailById(order.user_id);
     await sendEmailForOrderAccept({ ...order.toObject(), user_email: userEmail });
+
+    await createNotification(order.user_id, 'order_accept', `Your order ${orderId} has been accepted.`);
 
     res.status(200).json({ message: 'Order accepted successfully' });
   } catch (error) {
@@ -203,6 +225,9 @@ const denyOrder = async (req, res, next) => {
 
     const userEmail = await getUserEmailById(deletedOrder.user_id);
     await sendEmailForOrderDeny({ ...deletedOrder.toObject(), user_email: userEmail });
+
+    await createNotification(deletedOrder.user_id, 'order_deny', `Your order ${orderId} has been denied.`);
+
     return res.status(200).json({ message: 'Order denied successfully' });
   } catch (error) {
     next(error);
@@ -224,9 +249,10 @@ const UpdateOrderStatus = async (req, res, next) => {
     order.status = newStatus;
     await order.save();
 
-
     const userEmail = await getUserEmailById(order.user_id);
     await sendEmailForOrderUpdateOrderStatus({ ...order.toObject(), user_email: userEmail });
+
+    await createNotification(order.user_id, 'order_update_status', `Your order ${orderId} status has been updated to "${newStatus}".`);
 
     res.status(200).json({ message: `The status changed successfully to "${newStatus}"` });
   } catch (error) {
