@@ -21,16 +21,33 @@ const getAllOrders = async (req, res, next) => {
 
 const getAllAcceptedOrders = async (req, res, next) => {
   try {
-    const orders = await OrderModel.find({ accepted: true }, '_id user_id product status accepted createdAt updatedAt').exec();
+    const { page = 1, limit = 10 } = req.query;
+
+    const pageNum = parseInt(page, 10);
+    const limitNum = parseInt(limit, 10);
+
+    const orders = await OrderModel.find({ accepted: true }, '_id user_id product status accepted createdAt updatedAt')
+      .skip((pageNum - 1) * limitNum)
+      .limit(limitNum)
+      .exec();
+
     if (!orders || orders.length === 0) {
       return res.status(200).json({ message: 'No accepted orders found.' });
     }
-    res.status(200).json({ message: 'Accepted orders fetched successfully', data: orders });
+
+    const totalOrders = await OrderModel.countDocuments({ accepted: true });
+
+    res.status(200).json({
+      message: 'Accepted orders fetched successfully',
+      data: orders,
+      currentPage: pageNum,
+      totalPages: Math.ceil(totalOrders / limitNum),
+      totalOrders
+    });
   } catch (error) {
     next(error);
   }
 };
-
 const getOrderHistory = async (req, res, next) => {
   try {
     const userId = req.params.user_id;
