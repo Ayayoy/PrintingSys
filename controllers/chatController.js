@@ -35,8 +35,8 @@ const getChatByReceiverOrSenderID = async (req, res, next) => {
           { sender: userID1, receiver: userID2 },
           { sender: userID2, receiver: userID1 }
         ]
-      }, 'sender receiver content timestamp')
-      .sort({ timestamp: 1 });
+      }, 'sender receiver content createdAt')
+      .sort({ createdAt: 1 });
   
       res.status(200).json({ message: "Chat fetched successfully", data: chat });
     } catch (error) {

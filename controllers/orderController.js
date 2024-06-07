@@ -221,9 +221,6 @@ const acceptOrder = async (req, res, next) => {
 
     await generateInvoice(orderId, totalCost, paymentCode, deliveryTime);
 
-    const userEmail = await getUserEmailById(order.user_id);
-    await sendEmailForOrderAccept({ ...order.toObject(), user_email: userEmail });
-
     await createNotification(order.user_id, 'order_accept', `Your order ${orderId} has been accepted.`);
 
     res.status(200).json({ message: 'Order accepted successfully' });
@@ -265,9 +262,6 @@ const UpdateOrderStatus = async (req, res, next) => {
     }
     order.status = newStatus;
     await order.save();
-
-    const userEmail = await getUserEmailById(order.user_id);
-    await sendEmailForOrderUpdateOrderStatus({ ...order.toObject(), user_email: userEmail });
 
     await createNotification(order.user_id, 'order_update_status', `Your order ${orderId} status has been updated to "${newStatus}".`);
 
