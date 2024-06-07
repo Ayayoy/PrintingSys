@@ -6,6 +6,7 @@ const invoiceController = require('../controllers/invoiceController');
 const { authenticated, isAdmin } = require('../middleware/auth');
 const { createOrderValidator, updateOrderValidator } = require('../utils/validators/orderValidator');
 const upload = require('../utils/fileUpload');
+const cacheMiddleware = require('../middleware/cacheMiddleware');
 
 router.get('/', isAdmin, orderController.getAllOrders);
 router.get('/acceptedOrders', isAdmin, orderController.getAllAcceptedOrders);

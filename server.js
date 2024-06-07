@@ -1,3 +1,4 @@
+// server.js
 const dbConnection = require("./config/database");
 const express = require("express");
 const dotenv = require("dotenv");
@@ -7,7 +8,9 @@ const { Server } = require("socket.io");
 const { setupMiddleware } = require("./middleware/setupMiddleware");
 const { setupRoutes } = require("./routes/setupRoutes");
 const Chat = require("./models/chat");
+const { updateChatCache } = require("./controllers/chatController");
 dotenv.config({ path: "config/config.env" });
+
 const app = express();
 const corsOptions = {
   origin: ["http://localhost:5173", "http://localhost:5174"],
@@ -17,6 +20,7 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 app.use(express.json());
+
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
@@ -26,13 +30,17 @@ const io = new Server(server, {
     credentials: true,
   },
 });
+
 let users = {};
+
 io.on("connection", (socket) => {
   console.log("A user connected with ID:", socket.id);
+
   socket.on("register", (userId) => {
     users[userId] = socket.id;
     console.log("User registered with ID:", userId);
   });
+
   socket.on("message", async (message) => {
     try {
       const chatMessage = new Chat({
@@ -40,7 +48,9 @@ io.on("connection", (socket) => {
         receiver: message.receiverId,
         content: message.content,
       });
+
       await chatMessage.save();
+      await updateChatCache(message);
 
       const receiverSocketId = users[message.receiverId];
       if (receiverSocketId) {
@@ -50,6 +60,7 @@ io.on("connection", (socket) => {
       console.error("Error handling message:", error);
     }
   });
+
   socket.on("disconnect", () => {
     console.log("User disconnected with ID:", socket.id);
     for (let userId in users) {
@@ -60,13 +71,13 @@ io.on("connection", (socket) => {
     }
   });
 });
+
 const startServer = async () => {
   try {
     await dbConnection();
     setupMiddleware(app);
     setupRoutes(app);
     const PORT = process.env.PORT || 4000;
-
     server.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
@@ -75,4 +86,5 @@ const startServer = async () => {
     process.exit(1);
   }
 };
+
 startServer();

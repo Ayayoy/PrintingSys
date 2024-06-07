@@ -1,6 +1,13 @@
-//controllers/productController
 const Product = require("../models/product");
+const mongoose = require('mongoose');
 const upload = require("../utils/uploadToCloudinary");
+const { getAsync, setAsync, deleteAsync } = require("../utils/redisClient");
+
+const invalidateCache = async () => {
+    await deleteAsync('getAllProducts');
+    await deleteAsync('getShownProducts');
+    await deleteAsync('getDeletedProducts');
+};
 
 const createProduct = async (req, res, next) => {
   try {
@@ -13,9 +20,14 @@ const createProduct = async (req, res, next) => {
       folder: `${process.env.APP_Name}/products`,
     });
 
-    await Product.create({ ...req.body, image: imageUrl });
+    const newProduct = await Product.create({ ...req.body, image: imageUrl });
 
-    res.status(201).json({ message: "Product created successfully" });
+    await invalidateCache();
+
+    const products = await Product.find({}, "_id name description image deleted");
+    await setAsync('getAllProducts', JSON.stringify(products), 3600);
+
+    res.status(201).json({ message: "Product created successfully", data: newProduct });
   } catch (error) {
     next(error);
   }
@@ -23,6 +35,12 @@ const createProduct = async (req, res, next) => {
 
 const getAllProducts = async (req, res, next) => {
   try {
+    const key = 'getAllProducts';
+    const cachedProducts = await getAsync(key);
+    if (cachedProducts) {
+      return res.status(200).json({ message: 'Products fetched successfully', data: JSON.parse(cachedProducts) });
+    }
+
     const products = await Product.find(
       {},
       "_id name description image deleted"
@@ -30,9 +48,9 @@ const getAllProducts = async (req, res, next) => {
     if (!products.length) {
       return res.status(200).json({ message: "No Products found" });
     }
-    res
-      .status(200)
-      .json({ message: "Products fetched successfully", data: products });
+
+    await setAsync(key, JSON.stringify(products), 3600);
+    res.status(200).json({ message: "Products fetched successfully", data: products });
   } catch (error) {
     next(error);
   }
@@ -40,6 +58,12 @@ const getAllProducts = async (req, res, next) => {
 
 const getShownProducts = async (req, res, next) => {
   try {
+    const key = 'getShownProducts';
+    const cachedProducts = await getAsync(key);
+    if (cachedProducts) {
+      return res.status(200).json({ message: 'Products fetched successfully', data: JSON.parse(cachedProducts) });
+    }
+
     const products = await Product.find(
       { deleted: false },
       "_id name description image"
@@ -47,9 +71,9 @@ const getShownProducts = async (req, res, next) => {
     if (!products.length) {
       return res.status(200).json({ message: "No Products found" });
     }
-    res
-      .status(200)
-      .json({ message: "Products fetched successfully", data: products });
+
+    await setAsync(key, JSON.stringify(products), 3600);
+    res.status(200).json({ message: "Products fetched successfully", data: products });
   } catch (error) {
     next(error);
   }
@@ -57,6 +81,12 @@ const getShownProducts = async (req, res, next) => {
 
 const getDeletedProducts = async (req, res, next) => {
   try {
+    const key = 'getDeletedProducts';
+    const cachedProducts = await getAsync(key);
+    if (cachedProducts) {
+      return res.status(200).json({ message: 'Deleted Products fetched successfully', data: JSON.parse(cachedProducts) });
+    }
+
     const deletedProducts = await Product.find(
       { deleted: true },
       "_id name description image"
@@ -64,12 +94,9 @@ const getDeletedProducts = async (req, res, next) => {
     if (!deletedProducts.length) {
       return res.status(200).json({ message: "No Deleted Products found" });
     }
-    res
-      .status(200)
-      .json({
-        message: "Deleted Products fetched successfully",
-        data: deletedProducts,
-      });
+
+    await setAsync(key, JSON.stringify(deletedProducts), 3600);
+    res.status(200).json({ message: "Deleted Products fetched successfully", data: deletedProducts });
   } catch (error) {
     next(error);
   }
@@ -89,6 +116,7 @@ const getProductById = async (req, res, next) => {
     next(error);
   }
 };
+
 
 const updateProduct = async (req, res, next) => {
   try {
@@ -112,7 +140,12 @@ const updateProduct = async (req, res, next) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    res.status(200).json({ message: "Product updated successfully" });
+    await invalidateCache();
+
+    const products = await Product.find({}, "_id name description image deleted");
+    await setAsync('getAllProducts', JSON.stringify(products), 3600);
+
+    res.status(200).json({ message: "Product updated successfully", data: updatedProduct });
   } catch (error) {
     next(error);
   }
@@ -128,6 +161,11 @@ const toggleProductDeletedStatus = async (productId, deletedStatus) => {
   if (!updatedProduct) {
     throw new Error("Product not found");
   }
+
+  await invalidateCache();
+
+  const products = await Product.find({}, "_id name description image deleted");
+  await setAsync('getAllProducts', JSON.stringify(products), 3600);
 
   return updatedProduct;
 };
@@ -163,6 +201,11 @@ const deleteProduct = async (req, res, next) => {
     if (!deletedProduct) {
       return res.status(404).json({ message: "Product not found" });
     }
+
+    await invalidateCache();
+
+    const products = await Product.find({}, "_id name description image deleted");
+    await setAsync('getAllProducts', JSON.stringify(products), 3600);
 
     // Return a success message
     res.status(200).json({ message: "Product deleted successfully" });

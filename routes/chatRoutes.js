@@ -2,15 +2,13 @@ const express = require("express");
 const { 
   searchUser, 
   getChatByReceiverOrSenderID, 
-  userSendMessageToAdmins,
   getUniqueChatUsers,
 } = require("../controllers/chatController");
-
+const cacheMiddleware = require('../middleware/cacheMiddleware');
 const router = express.Router();
 
 router.get("/searchUser/:query", searchUser);
 router.post("/getChatByReceiverOrSenderID", getChatByReceiverOrSenderID);
-router.post("/user/sendMessageToAdmins", userSendMessageToAdmins);
 router.get("/getUniqueChatUsers/:userId", getUniqueChatUsers);
 
 module.exports = router;

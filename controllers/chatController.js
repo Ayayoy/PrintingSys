@@ -1,6 +1,8 @@
+// controllers/chatController.js
 const Chat = require("../models/chat");
 const UserModel = require("../models/user");
 const mongoose = require('mongoose');
+const { getAsync, setAsync, deleteAsync } = require('../utils/redisClient');
 
 const searchUser = async (req, res, next) => {
   try {
@@ -27,38 +29,27 @@ const searchUser = async (req, res, next) => {
 };
 
 const getChatByReceiverOrSenderID = async (req, res, next) => {
-    try {
-      const { userID1, userID2 } = req.body;
-  
-      const chat = await Chat.find({
+  try {
+    const { userID1, userID2 } = req.body;
+    const cacheKey = `chaty:${userID1}:${userID2}`;
+
+    let chat = await getAsync(cacheKey);
+
+    if (!chat) {
+      chat = await Chat.find({
         $or: [
           { sender: userID1, receiver: userID2 },
           { sender: userID2, receiver: userID1 }
         ]
-      }, 'sender receiver content createdAt')
-      .sort({ createdAt: 1 });
-  
-      res.status(200).json({ message: "Chat fetched successfully", data: chat });
-    } catch (error) {
-      next(error);
+      }, 'sender receiver content createdAt').sort({ createdAt: 1 });
+
+      await setAsync(cacheKey, JSON.stringify(chat), 3600); // Cache for 1 hour
+    } else {
+      chat = JSON.parse(chat);
     }
-};
-   
-const userSendMessageToAdmins = async (req, res, next) => {
-  try {
-    const { userId, content } = req.body;
-    const admins = await UserModel.find({ role: 'admin' });
 
-    const chatMessages = admins.map(admin => ({
-      sender: userId,
-      receiver: admin._id,
-      content,
-    }));
-
-    await Chat.insertMany(chatMessages);
-    
-    res.status(200).json({ message: "Message sent to all admins successfully" });
-} catch (error) {
+    res.status(200).json({ message: "Chat fetched successfully", data: chat });
+  } catch (error) {
     next(error);
   }
 };
@@ -76,7 +67,7 @@ const getUniqueChatUsers = async (req, res, next) => {
         }
       },
       {
-        $sort: { timestamp: -1 }
+        $sort: { createdAt: -1 }
       },
       {
         $group: {
@@ -107,7 +98,7 @@ const getUniqueChatUsers = async (req, res, next) => {
         email: user.email,
         lastMessage: lastMessage.content,
         senderId: senderId,
-        timestamp: lastMessage.timestamp
+        timestamp: lastMessage.createdAt
       };
     });
 
@@ -117,60 +108,37 @@ const getUniqueChatUsers = async (req, res, next) => {
   }
 };
 
+const updateChatCache = async (message) => {
+  const { senderId, receiverId, content } = message;
+  const chatKey1 = `chaty:${senderId}:${receiverId}`;
+  const chatKey2 = `chaty:${receiverId}:${senderId}`;
+
+  let chat1 = await getAsync(chatKey1);
+  let chat2 = await getAsync(chatKey2);
+
+  const newMessage = {
+    sender: senderId,
+    receiver: receiverId,
+    content: content,
+    createdAt: new Date()
+  };
+
+  if (chat1) {
+    chat1 = JSON.parse(chat1);
+    chat1.push(newMessage);
+    await setAsync(chatKey1, JSON.stringify(chat1), 3600);
+  }
+
+  if (chat2) {
+    chat2 = JSON.parse(chat2);
+    chat2.push(newMessage);
+    await setAsync(chatKey2, JSON.stringify(chat2), 3600);
+  }
+};
+
 module.exports = {
   searchUser,
   getChatByReceiverOrSenderID,
-  userSendMessageToAdmins,
-  getUniqueChatUsers
+  getUniqueChatUsers,
+  updateChatCache
 };
-
-//   // Get chats for specific user (admin or user)
-//   const getChatsForSpecificUser = async (req, res, next) => {
-//       try {
-//           const userID = req.params.userID;
-  
-  
-//           //implement
-          
-//           res.status(200).json({ message: "Chats fetched successfully", data: uniqueChats });
-//       } catch (error) {
-//           next(error);
-//       }
-//   };
-  
-  
-//   // Get all chats for an admin
-//   const getAllChatsForAdmin = async (req, res, next) => {
-//     try {
-//       const adminId = req.params.adminId;
-  
-//       const chats = await Chat.find({ receiver: adminId })
-//         .populate('sender', 'username email')
-//         .populate('receiver', 'username email')
-//         .sort({ timestamp: 1 });
-
-//       res.status(200).json({ message: "Chats fetched successfully", data: chats });
-//     } catch (error) {
-//       next(error);
-//     }
-//   };
-    // // Fetch messages between user and admin
-    // const getMessagesBetweenUserAndAdmin = async (req, res, next) => {
-    //     try {
-    //     const { userId, adminId } = req.params;
-    
-    //     const chats = await Chat.find({
-    //       $or: [
-    //         { sender: userId, receiver: adminId },
-    //         { sender: adminId, receiver: userId }
-    //       ]
-    //     })
-    //     .populate('sender', 'username email')
-    //     .populate('receiver', 'username email')
-    //     .sort({ timestamp: 1 });
-        
-    //     res.status(200).json({ message: "Messages fetched successfully", data: chats });
-    // } catch (error) {
-    //     next(error);
-    //   }
-    // };
