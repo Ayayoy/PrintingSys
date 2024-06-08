@@ -1,6 +1,6 @@
 const Product = require("../models/product");
 const mongoose = require('mongoose');
-const upload = require("../utils/uploadToCloudinary");
+const upload = require('../utils/fileUpload');
 const { getAsync, setAsync, deleteAsync } = require("../utils/redisClient");
 
 const invalidateCache = async () => {
@@ -16,10 +16,8 @@ const createProduct = async (req, res, next) => {
       return res.status(400).json({ message: "Product image is required." });
     }
 
-    const imageUrl = await upload(file, {
-      folder: `${process.env.APP_Name}/products`,
-    });
-
+    const imageUrl = `${req.protocol}://${req.get('host')}/uploads/products/${file.filename}`;
+    
     const newProduct = await Product.create({ ...req.body, image: imageUrl });
 
     await invalidateCache();
@@ -123,11 +121,9 @@ const updateProduct = async (req, res, next) => {
     const productId = req.params.id;
     const productData = req.body;
 
-    if (req.file && req.file.path) {
-      const imageUrl = await upload(req.file, {
-        folder: `${process.env.APP_Name}/products`,
-      });
-      productData.image = imageUrl;
+    const file = req.file;
+    if (file) {
+      productData.image = `${req.protocol}://${req.get('host')}/uploads/products/${file.filename}`;
     }
 
     const updatedProduct = await Product.findByIdAndUpdate(

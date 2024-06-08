@@ -152,10 +152,7 @@ const createOrder = async (req, res, next) => {
         const filePath = req.file.path;
         const fileName = req.file.filename;
 
-        const driveFile = await uploadToDrive.uploadFile(filePath, fileName);
-
-        const driveFileId = driveFile.id;
-        const fileLink = `https://drive.google.com/uc?id=${driveFileId}`;
+        const fileLink = `${req.protocol}://${req.get('host')}/uploads/orders/${fileName}`;
 
         const product = { product_id, quantity, file: fileLink, notes, data };
 
@@ -186,12 +183,9 @@ const updateOrder = async (req, res, next) => {
             const filePath = req.file.path;
             const fileName = req.file.filename;
 
-            const driveFile = await uploadToDrive.uploadFile(filePath, fileName);
+            const fileLink = `${req.protocol}://${req.get('host')}/uploads/orders/${fileName}`;
 
-            const driveFileId = driveFile.id;
-            const fileLink = `https://drive.google.com/uc?id=${driveFileId}`;
-
-            order.product.file = fileLink;
+            updateData.file = fileLink;
         }
 
         if (updateData) {
